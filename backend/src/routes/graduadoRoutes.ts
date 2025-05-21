@@ -20,4 +20,7 @@ router.put('/:id', adminAuth, graduadoController.update)
 router.put('/:id/estado', adminAuth, graduadoController.updateEstado)
 router.delete('/:id', adminAuth, graduadoController.delete)
 
+// Nueva ruta para actualizar estado y calcular coordenadas
+router.put('/:id/status', graduadoController.updateStatus)
+
 export default router 

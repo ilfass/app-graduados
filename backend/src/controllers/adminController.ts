@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { AdministradorModel } from '../models/Administrador'
+import { Graduado } from '../models/Graduado'
 
 export const adminController = {
   // Crear un nuevo administrador
@@ -70,6 +71,26 @@ export const adminController = {
       res.json({ message: 'Administrador eliminado correctamente' })
     } catch (error) {
       res.status(500).json({ error: 'Error al eliminar el administrador' })
+    }
+  },
+
+  // Endpoint para estadísticas del dashboard
+  async dashboardStats(req, res) {
+    try {
+      // Total graduados
+      const totalGraduados = await Graduado.count();
+      // Total países distintos
+      const totalPaises = await Graduado.count({ distinct: true, col: 'pais' });
+      // Total carreras distintas
+      const totalCarreras = await Graduado.count({ distinct: true, col: 'carrera' });
+
+      res.json({
+        totalGraduados,
+        totalPaises,
+        totalCarreras
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener estadísticas del dashboard' });
     }
   }
 } 

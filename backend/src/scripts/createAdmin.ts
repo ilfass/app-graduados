@@ -1,30 +1,28 @@
 import { sequelize } from '../config/database';
-import { Administrador } from '../models/Administrador';
-import bcrypt from 'bcryptjs';
+import { AdministradorModel } from '../models/Administrador';
 
 async function createAdmin() {
   try {
     await sequelize.sync();
 
-    const adminExists = await Administrador.findOne({
-      where: { email: 'admin@unicen.edu.ar' }
-    });
+    const adminExists = await AdministradorModel.findByEmail('admin@unicen.edu.ar');
 
     if (adminExists) {
-      console.log('El administrador ya existe');
-      process.exit(0);
+      console.log('El administrador ya existe, eliminando...');
+      await AdministradorModel.delete(adminExists.id!);
     }
 
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const password = 'admin123';
+    console.log('Contraseña original:', password);
 
-    await Administrador.create({
+    const admin = await AdministradorModel.create({
       nombre: 'Admin',
       apellido: 'UNICEN',
       email: 'admin@unicen.edu.ar',
-      password: hashedPassword
+      password: password
     });
 
-    console.log('Administrador creado exitosamente');
+    console.log('Administrador creado exitosamente:', admin);
     process.exit(0);
   } catch (error) {
     console.error('Error al crear el administrador:', error);

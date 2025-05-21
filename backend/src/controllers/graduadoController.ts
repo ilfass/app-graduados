@@ -7,6 +7,7 @@ import { env } from '../config/env'
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
+import axios from 'axios'
 
 // Configuración de multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
@@ -53,6 +54,12 @@ export const graduadoController = {
         return res.status(400).json({ error: 'La contraseña es requerida' })
       }
 
+      // Verificar si el email ya existe
+      const emailExistente = await Graduado.findOne({ where: { email: restoDatos.email } })
+      if (emailExistente) {
+        return res.status(400).json({ error: 'El email ya está registrado' })
+      }
+
       // Convertir anio_graduacion a número
       const datosProcesados = {
         ...restoDatos,
@@ -79,8 +86,11 @@ export const graduadoController = {
           email: graduado.email
         }
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al registrar graduado:', error)
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        return res.status(400).json({ error: 'El email ya está registrado' })
+      }
       res.status(500).json({ error: 'Error al registrar graduado' })
     }
   },
@@ -88,11 +98,26 @@ export const graduadoController = {
   // Obtener todos los graduados
   async getAll(req: Request, res: Response) {
     try {
-      const graduados = await Graduado.findAll()
+      const graduados = await Graduado.findAll({
+        attributes: [
+          'id', 
+          'nombre', 
+          'apellido', 
+          'email',
+          'carrera', 
+          'anio_graduacion',
+          'ciudad', 
+          'pais', 
+          'institucion',
+          'estado',
+          'latitud', 
+          'longitud'
+        ]
+      })
       res.json(graduados)
     } catch (error) {
       console.error('Error al obtener graduados:', error)
-      res.status(500).json({ error: 'Error al obtener graduados' })
+      res.status(500).json({ message: 'Error al obtener graduados' })
     }
   },
 
@@ -176,18 +201,23 @@ export const graduadoController = {
         observaciones_admin: observaciones 
       });
 
-      // Enviar correo según el estado
-      if (estado === 'aprobado') {
-        await EmailService.sendApprovalEmail(
-          graduado.email,
-          `${graduado.nombre} ${graduado.apellido}`
-        );
-      } else if (estado === 'rechazado') {
-        await EmailService.sendRejectionEmail(
-          graduado.email,
-          `${graduado.nombre} ${graduado.apellido}`,
-          observaciones || 'No se proporcionó un motivo específico'
-        );
+      // Intentar enviar correo según el estado, pero no fallar si no se puede
+      try {
+        if (estado === 'aprobado') {
+          await EmailService.sendApprovalEmail(
+            graduado.email,
+            `${graduado.nombre} ${graduado.apellido}`
+          );
+        } else if (estado === 'rechazado') {
+          await EmailService.sendRejectionEmail(
+            graduado.email,
+            `${graduado.nombre} ${graduado.apellido}`,
+            observaciones || 'No se proporcionó un motivo específico'
+          );
+        }
+      } catch (emailError) {
+        console.error('Error al enviar correo:', emailError);
+        // No fallamos si el correo no se puede enviar
       }
 
       res.json(graduado);
@@ -311,7 +341,7 @@ export const graduadoController = {
         return res.status(404).json({ error: 'Graduado no encontrado' });
       }
 
-      const { nombre, apellido, email, carrera, anio_graduacion, ciudad, pais, institucion, linkedin, biografia } = req.body;
+      const { nombre, apellido, email, carrera, anio_graduacion, ciudad, pais, institucion, linkedin, biografia, latitud, longitud } = req.body;
 
       await graduado.update({
         nombre,
@@ -323,10 +353,22 @@ export const graduadoController = {
         pais,
         institucion,
         linkedin,
-        biografia
+        biografia,
+        latitud,
+        longitud
       });
 
-      res.json(graduado);
+      // Generar nuevo token
+      const token = jwt.sign(
+        { id: graduado.id, isAdmin: false },
+        env.jwtSecret,
+        { expiresIn: '24h' }
+      );
+
+      res.json({
+        ...graduado.toJSON(),
+        token
+      });
     } catch (error) {
       console.error('Error al actualizar perfil:', error);
       res.status(500).json({ error: 'Error al actualizar perfil' });
@@ -381,6 +423,50 @@ export const graduadoController = {
     } catch (error) {
       console.error('Error al restablecer contraseña:', error);
       res.status(500).json({ error: 'Error al restablecer la contraseña' });
+    }
+  },
+
+  async updateStatus(req: Request, res: Response) {
+    try {
+      const { id } = req.params
+      const { estado } = req.body
+
+      const graduado = await Graduado.findByPk(id)
+      if (!graduado) {
+        return res.status(404).json({ message: 'Graduado no encontrado' })
+      }
+
+      // Actualizar estado
+      graduado.estado = estado
+
+      // Si el estado es aprobado, calcular coordenadas
+      if (estado === 'aprobado') {
+        try {
+          // Construir query para geocodificación
+          const query = graduado.institucion 
+            ? `${graduado.institucion}, ${graduado.ciudad}, ${graduado.pais}`
+            : `${graduado.ciudad}, ${graduado.pais}`
+
+          // Llamar a Nominatim API
+          const response = await axios.get(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
+          )
+
+          if (response.data && response.data.length > 0) {
+            graduado.latitud = parseFloat(response.data[0].lat)
+            graduado.longitud = parseFloat(response.data[0].lon)
+          }
+        } catch (error) {
+          console.error('Error al obtener coordenadas:', error)
+          // Si falla la geocodificación, no actualizamos las coordenadas
+        }
+      }
+
+      await graduado.save()
+      res.json(graduado)
+    } catch (error) {
+      console.error('Error al actualizar estado:', error)
+      res.status(500).json({ message: 'Error al actualizar estado' })
     }
   },
 } 

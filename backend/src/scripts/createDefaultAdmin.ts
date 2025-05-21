@@ -1,5 +1,5 @@
 import { syncDatabase } from '../config/database'
-import { Administrador } from '../models'
+import { AdministradorModel } from '../models/Administrador'
 import bcrypt from 'bcryptjs'
 
 const createDefaultAdmin = async () => {
@@ -7,9 +7,7 @@ const createDefaultAdmin = async () => {
     await syncDatabase()
 
     // Verificar si ya existe un administrador
-    const existingAdmin = await Administrador.findOne({
-      where: { email: 'admin@unicen.edu.ar' }
-    })
+    const existingAdmin = await AdministradorModel.findByEmail('admin@unicen.edu.ar')
 
     if (existingAdmin) {
       console.log('El administrador por defecto ya existe')
@@ -17,10 +15,11 @@ const createDefaultAdmin = async () => {
     }
 
     // Crear el administrador por defecto
-    const hashedPassword = await bcrypt.hash('admin123', 10)
-    await Administrador.create({
+    await AdministradorModel.create({
+      nombre: 'Admin',
+      apellido: 'UNICEN',
       email: 'admin@unicen.edu.ar',
-      password: hashedPassword
+      password: 'admin123'
     })
 
     console.log('Administrador por defecto creado exitosamente')

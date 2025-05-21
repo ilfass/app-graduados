@@ -17,6 +17,8 @@ export class Graduado extends Model {
   declare foto?: string
   declare estado: 'pendiente' | 'aprobado' | 'rechazado'
   declare observaciones_admin?: string
+  declare latitud?: number
+  declare longitud?: number
   declare created_at: Date
   declare updated_at: Date
 }
@@ -86,6 +88,14 @@ Graduado.init(
     },
     observaciones_admin: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    latitud: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    longitud: {
+      type: DataTypes.FLOAT,
       allowNull: true,
     },
     created_at: {
