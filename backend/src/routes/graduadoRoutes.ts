@@ -18,6 +18,7 @@ router.get('/', adminAuth, graduadoController.getAll)
 router.get('/:id', adminAuth, graduadoController.getById)
 router.put('/:id', adminAuth, graduadoController.update)
 router.put('/:id/estado', adminAuth, graduadoController.updateEstado)
+router.put('/:id/reset-password', adminAuth, graduadoController.resetPassword)
 router.delete('/:id', adminAuth, graduadoController.delete)
 
 // Nueva ruta para actualizar estado y calcular coordenadas

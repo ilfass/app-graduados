@@ -523,22 +523,28 @@ export const graduadoController = {
   // Restablecer contraseña
   async resetPassword(req: Request, res: Response) {
     try {
-      const { token, password } = req.body;
+      const { id } = req.params
+      const { newPassword } = req.body
 
-      const decoded = jwt.verify(token, env.jwtSecret) as { id: number };
-      const graduado = await Graduado.findByPk(decoded.id);
-
-      if (!graduado) {
-        return res.status(404).json({ error: 'Graduado no encontrado' });
+      if (!newPassword) {
+        return res.status(400).json({ message: 'La nueva contraseña es requerida' })
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-      await graduado.update({ password: hashedPassword });
+      const graduado = await Graduado.findByPk(id)
+      if (!graduado) {
+        return res.status(404).json({ message: 'Graduado no encontrado' })
+      }
 
-      res.json({ message: 'Contraseña actualizada con éxito' });
+      // Encriptar la nueva contraseña
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+      
+      // Actualizar la contraseña
+      await graduado.update({ password: hashedPassword })
+
+      res.json({ message: 'Contraseña actualizada correctamente' })
     } catch (error) {
-      console.error('Error al restablecer contraseña:', error);
-      res.status(500).json({ error: 'Error al restablecer la contraseña' });
+      console.error('Error al restablecer contraseña:', error)
+      res.status(500).json({ message: 'Error al restablecer la contraseña' })
     }
   },
 

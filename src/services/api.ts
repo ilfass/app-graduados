@@ -100,9 +100,9 @@ export const graduadoService = {
     return response.data;
   },
 
-  resetPassword: async (token: string, password: string) => {
-    const response = await api.post(`/auth/reset-password/${token}`, { password });
-    return response.data;
+  resetPassword: async (id: number, newPassword: string) => {
+    const response = await api.put(`/graduados/${id}/reset-password`, { newPassword })
+    return response.data
   },
 
   uploadPhoto: async (id: number, file: File) => {

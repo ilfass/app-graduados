@@ -84,6 +84,10 @@ const Login = () => {
     }
   };
 
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <Container maxW="container.sm" py={10}>
       <VStack spacing={8} align="stretch">
@@ -127,17 +131,19 @@ const Login = () => {
                         onChange={handleChange}
                         placeholder="Tu contraseña"
                       />
-                      <InputRightElement>
-                        <IconButton
-                          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                          icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                          onClick={() => setShowPassword(!showPassword)}
-                          variant="ghost"
-                          size="sm"
-                        />
+                      <InputRightElement width="4.5rem">
+                        <Button h="1.75rem" size="sm" onClick={handleShowPassword}>
+                          {showPassword ? 'Ocultar' : 'Mostrar'}
+                        </Button>
                       </InputRightElement>
                     </InputGroup>
                   </FormControl>
+
+                  <Box textAlign="right">
+                    <Link as={RouterLink} to="/forgot-password" color="blue.500">
+                      ¿Olvidaste tu contraseña?
+                    </Link>
+                  </Box>
 
                   <Button
                     type="submit"
@@ -156,10 +162,6 @@ const Login = () => {
                       Regístrate aquí
                     </Link>
                   </Text>
-
-                  <Link as={RouterLink} to="/forgot-password" color="blue.500">
-                    ¿Olvidaste tu contraseña?
-                  </Link>
                 </VStack>
               </Box>
             </TabPanel>
@@ -188,17 +190,19 @@ const Login = () => {
                         onChange={handleChange}
                         placeholder="Tu contraseña"
                       />
-                      <InputRightElement>
-                        <IconButton
-                          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                          icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                          onClick={() => setShowPassword(!showPassword)}
-                          variant="ghost"
-                          size="sm"
-                        />
+                      <InputRightElement width="4.5rem">
+                        <Button h="1.75rem" size="sm" onClick={handleShowPassword}>
+                          {showPassword ? 'Ocultar' : 'Mostrar'}
+                        </Button>
                       </InputRightElement>
                     </InputGroup>
                   </FormControl>
+
+                  <Box textAlign="right">
+                    <Link as={RouterLink} to="/forgot-password" color="blue.500">
+                      ¿Olvidaste tu contraseña?
+                    </Link>
+                  </Box>
 
                   <Button
                     type="submit"
