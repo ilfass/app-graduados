@@ -27,13 +27,15 @@ export interface Graduado {
   anio_graduacion: number;
   ciudad: string;
   pais: string;
-  institucion: string;
+  institucion?: string;
   linkedin?: string;
   biografia?: string;
   estado?: 'pendiente' | 'aprobado' | 'rechazado';
   foto?: string;
   documento_identidad?: string;
   observaciones_admin?: string;
+  latitud?: number;
+  longitud?: number;
 }
 
 export const graduadoService = {
@@ -53,7 +55,7 @@ export const graduadoService = {
 
   login: async (email: string, password: string) => {
     try {
-      const response = await api.post('/graduados/login', { email, password })
+      const response = await api.post('/auth/login/graduado', { email, password })
       return response.data
     } catch (error) {
       console.error('Error en el login:', error)
@@ -74,11 +76,23 @@ export const graduadoService = {
     anio_graduacion: number;
     ciudad: string;
     pais: string;
+    institucion?: string;
     linkedin?: string;
     biografia?: string;
+    latitud?: number;
+    longitud?: number;
   }) => {
-    const response = await api.put(`/graduados/${id}`, data);
-    return response.data;
+    try {
+      const response = await api.put(`/graduados/profile`, data);
+      // Actualizar el token si se recibe uno nuevo
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar perfil:', error);
+      throw error;
+    }
   },
 
   requestPasswordReset: async (email: string) => {
@@ -114,11 +128,25 @@ export const graduadoService = {
     });
     return response.data;
   },
+
+  getAll: async () => {
+    const response = await api.get('/graduados');
+    // Filtrar solo graduados aprobados con coordenadas válidas
+    const graduadosValidos = response.data.filter((g: Graduado) => 
+      g.estado === 'aprobado' && 
+      typeof g.latitud === 'number' && 
+      typeof g.longitud === 'number' &&
+      !isNaN(g.latitud) && 
+      !isNaN(g.longitud)
+    );
+    console.log('Graduados válidos:', graduadosValidos);
+    return { data: graduadosValidos };
+  },
 };
 
 export const adminService = {
   login: async (email: string, password: string) => {
-    const response = await api.post('/admin/login', { email, password });
+    const response = await api.post('/auth/login/admin', { email, password });
     return response.data;
   },
 
@@ -127,8 +155,13 @@ export const adminService = {
     return response.data;
   },
 
+  getDashboardStats: async () => {
+    const response = await api.get('/admin/dashboard-stats');
+    return response.data;
+  },
+
   updateGraduadoStatus: async (id: number, estado: 'aprobado' | 'rechazado') => {
-    const response = await api.put(`/admin/graduados/${id}`, { estado });
+    const response = await api.put(`/graduados/${id}/estado`, { estado });
     return response.data;
   },
 

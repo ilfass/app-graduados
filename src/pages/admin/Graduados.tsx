@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Table,
@@ -16,69 +16,84 @@ import {
   InputLeftElement,
   Flex,
   Select,
+  VStack
 } from '@chakra-ui/react';
 import { FiSearch } from 'react-icons/fi';
+import { adminService } from '../../services/api';
 
 interface Graduado {
-  id: string;
+  id: number;
   nombre: string;
   apellido: string;
   email: string;
   carrera: string;
-  añoGraduacion: string;
+  anio_graduacion: number;
   estado: 'pendiente' | 'aprobado' | 'rechazado';
 }
 
 const Graduados = () => {
   const toast = useToast();
-  const [registros, setRegistros] = useState<Graduado[]>([
-    {
-      id: '1',
-      nombre: 'Juan',
-      apellido: 'Pérez',
-      email: 'juan@email.com',
-      carrera: 'Ingeniería en Sistemas',
-      añoGraduacion: '2020',
-      estado: 'pendiente',
-    },
-    {
-      id: '2',
-      nombre: 'María',
-      apellido: 'González',
-      email: 'maria@email.com',
-      carrera: 'Ingeniería Química',
-      añoGraduacion: '2019',
-      estado: 'aprobado',
-    },
-  ]);
-
+  const [registros, setRegistros] = useState<Graduado[]>([]);
   const [filtro, setFiltro] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
 
-  const handleAprobar = (id: string) => {
-    setRegistros(prev =>
-      prev.map(reg =>
-        reg.id === id ? { ...reg, estado: 'aprobado' } : reg
-      )
-    );
-    toast({
-      title: 'Registro aprobado',
-      status: 'success',
-      duration: 3000,
-    });
+  useEffect(() => {
+    const fetchGraduados = async () => {
+      try {
+        const data = await adminService.getGraduados();
+        setRegistros(data);
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'No se pudieron cargar los graduados',
+          status: 'error',
+          duration: 3000,
+        });
+      }
+    };
+    fetchGraduados();
+  }, [toast]);
+
+  const handleAprobar = async (id: number) => {
+    try {
+      await adminService.updateGraduadoStatus(id, 'aprobado');
+      toast({
+        title: 'Registro aprobado',
+        status: 'success',
+        duration: 3000,
+      });
+      // Refrescar la lista
+      const data = await adminService.getGraduados();
+      setRegistros(data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo aprobar el graduado',
+        status: 'error',
+        duration: 3000,
+      });
+    }
   };
 
-  const handleRechazar = (id: string) => {
-    setRegistros(prev =>
-      prev.map(reg =>
-        reg.id === id ? { ...reg, estado: 'rechazado' } : reg
-      )
-    );
-    toast({
-      title: 'Registro rechazado',
-      status: 'error',
-      duration: 3000,
-    });
+  const handleRechazar = async (id: number) => {
+    try {
+      await adminService.updateGraduadoStatus(id, 'rechazado');
+      toast({
+        title: 'Registro rechazado',
+        status: 'error',
+        duration: 3000,
+      });
+      // Refrescar la lista
+      const data = await adminService.getGraduados();
+      setRegistros(data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo rechazar el graduado',
+        status: 'error',
+        duration: 3000,
+      });
+    }
   };
 
   const getEstadoColor = (estado: string) => {
@@ -151,32 +166,32 @@ const Graduados = () => {
                   <Td>{`${registro.nombre} ${registro.apellido}`}</Td>
                   <Td>{registro.email}</Td>
                   <Td>{registro.carrera}</Td>
-                  <Td>{registro.añoGraduacion}</Td>
+                  <Td>{registro.anio_graduacion}</Td>
                   <Td>
                     <Badge colorScheme={getEstadoColor(registro.estado)}>
                       {registro.estado}
                     </Badge>
                   </Td>
                   <Td>
-                    {registro.estado === 'pendiente' && (
-                      <Box>
-                        <Button
-                          colorScheme="green"
-                          size="sm"
-                          mr={2}
-                          onClick={() => handleAprobar(registro.id)}
-                        >
-                          Aprobar
-                        </Button>
-                        <Button
-                          colorScheme="red"
-                          size="sm"
-                          onClick={() => handleRechazar(registro.id)}
-                        >
-                          Rechazar
-                        </Button>
-                      </Box>
-                    )}
+                    <Box>
+                      <Button
+                        colorScheme="green"
+                        size="sm"
+                        mr={2}
+                        onClick={() => handleAprobar(registro.id)}
+                        isDisabled={registro.estado === 'aprobado'}
+                      >
+                        Aprobar
+                      </Button>
+                      <Button
+                        colorScheme="red"
+                        size="sm"
+                        onClick={() => handleRechazar(registro.id)}
+                        isDisabled={registro.estado === 'rechazado'}
+                      >
+                        Rechazar
+                      </Button>
+                    </Box>
                   </Td>
                 </Tr>
               ))}

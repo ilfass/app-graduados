@@ -17,32 +17,35 @@ import {
 import { FiUsers, FiMap, FiSearch, FiSettings } from 'react-icons/fi';
 import Graduados from './admin/Graduados';
 import Configuracion from './admin/Configuracion';
+import { useEffect, useState } from 'react';
+import { adminService } from '../services/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
-  const stats = [
-    {
-      label: 'Total Graduados',
-      value: '1,234',
-      icon: FiUsers,
-      color: 'blue.500',
-    },
-    {
-      label: 'Países',
-      value: '15',
-      icon: FiMap,
-      color: 'green.500',
-    },
-    {
-      label: 'Carreras',
-      value: '10',
-      icon: FiSearch,
-      color: 'purple.500',
-    },
-  ];
+  const [stats, setStats] = useState([
+    { label: 'Total Graduados', value: '-', icon: FiUsers, color: 'blue.500' },
+    { label: 'Países', value: '-', icon: FiMap, color: 'green.500' },
+    { label: 'Carreras', value: '-', icon: FiSearch, color: 'purple.500' },
+  ]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await adminService.getDashboardStats();
+        setStats([
+          { label: 'Total Graduados', value: data.totalGraduados, icon: FiUsers, color: 'blue.500' },
+          { label: 'Países', value: data.totalPaises, icon: FiMap, color: 'green.500' },
+          { label: 'Carreras', value: data.totalCarreras, icon: FiSearch, color: 'purple.500' },
+        ]);
+      } catch (error) {
+        // Si hay error, mantener los valores por defecto
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <Box p={5}>
@@ -98,6 +101,13 @@ const Dashboard = () => {
                 onClick={() => navigate('/admin/graduados')}
               >
                 Gestionar Graduados
+              </Button>
+              <Button
+                leftIcon={<Icon as={FiMap} />}
+                colorScheme="green"
+                onClick={() => navigate('/mapa')}
+              >
+                Ver Mapa de Graduados
               </Button>
               <Button
                 leftIcon={<Icon as={FiSettings} />}

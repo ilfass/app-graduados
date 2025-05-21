@@ -6,7 +6,6 @@ import imageCompression from 'browser-image-compression';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 
 // Fix para los íconos de Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -15,6 +14,18 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
+
+// Cargar la biblioteca de Google Maps
+const loadGoogleMapsScript = () => {
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+  return new Promise((resolve) => {
+    script.onload = resolve;
+  });
+};
 
 interface PerfilGraduado {
   id: number;
@@ -648,38 +659,22 @@ const Profile = () => {
               </div>
               <div style={styles.formGroup}>
                 <label style={styles.label}>Ubicación</label>
-                <PlacesAutocomplete
-                  value={address}
-                  onChange={setAddress}
-                  onSelect={handleLocationSearch}
-                >
-                  {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-                    <div>
-                      <input
-                        {...getInputProps({
-                          placeholder: 'Buscar ubicación...',
-                          style: styles.input,
-                        })}
-                      />
-                      <div>
-                        {loading && <div>Cargando...</div>}
-                        {suggestions.map((suggestion) => (
-                          <div
-                            {...getSuggestionItemProps(suggestion)}
-                            key={suggestion.placeId}
-                            style={{
-                              padding: '0.5rem',
-                              cursor: 'pointer',
-                              backgroundColor: suggestion.active ? '#E5E7EB' : 'white',
-                            }}
-                          >
-                            {suggestion.description}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </PlacesAutocomplete>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    style={styles.input}
+                    placeholder="Buscar ubicación..."
+                  />
+                  <button
+                    type="button"
+                    onClick={handleLocationSearch}
+                    style={styles.button}
+                  >
+                    Buscar
+                  </button>
+                </div>
                 {graduado.latitud && graduado.longitud && (
                   <MapContainer
                     center={[graduado.latitud, graduado.longitud]}

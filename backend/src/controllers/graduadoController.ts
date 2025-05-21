@@ -98,6 +98,7 @@ export const graduadoController = {
   // Obtener todos los graduados
   async getAll(req: Request, res: Response) {
     try {
+      console.log('Obteniendo todos los graduados...');
       const graduados = await Graduado.findAll({
         attributes: [
           'id', 
@@ -114,6 +115,7 @@ export const graduadoController = {
           'longitud'
         ]
       })
+      console.log('Graduados encontrados en la base de datos:', graduados);
       res.json(graduados)
     } catch (error) {
       console.error('Error al obtener graduados:', error)
@@ -190,37 +192,82 @@ export const graduadoController = {
       const { id } = req.params;
       const { estado, observaciones } = req.body;
 
+      console.log('Actualizando estado del graduado:', { id, estado, observaciones });
+
       const graduado = await Graduado.findByPk(id);
       if (!graduado) {
         return res.status(404).json({ error: 'Graduado no encontrado' });
       }
 
       const oldEstado = graduado.estado;
+      
+      // Si el estado cambia a aprobado y no tiene coordenadas, intentar obtenerlas
+      if (estado === 'aprobado' && oldEstado !== 'aprobado' && (!graduado.latitud || !graduado.longitud)) {
+        try {
+          // Intentar diferentes combinaciones de búsqueda
+          const queries = [
+            graduado.institucion ? `${graduado.institucion}, ${graduado.ciudad}, ${graduado.pais}` : null,
+            `${graduado.ciudad}, ${graduado.pais}`,
+            graduado.pais
+          ].filter((query): query is string => query !== null);
+
+          console.log('Intentando obtener coordenadas con las siguientes queries:', queries);
+
+          for (const query of queries) {
+            try {
+              const response = await axios.get(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
+                { 
+                  timeout: 5000,
+                  headers: {
+                    'User-Agent': 'GraduadosUNICEN/1.0'
+                  }
+                }
+              );
+
+              if (response.data && response.data.length > 0) {
+                const lat = parseFloat(response.data[0].lat);
+                const lon = parseFloat(response.data[0].lon);
+                console.log(`Coordenadas obtenidas para "${query}":`, { lat, lon });
+                
+                // Actualizar el graduado con las nuevas coordenadas
+                await graduado.update({
+                  estado,
+                  observaciones_admin: observaciones,
+                  latitud: lat,
+                  longitud: lon
+                });
+
+                // Recargar el graduado para obtener los datos actualizados
+                const graduadoActualizado = await Graduado.findByPk(id);
+                console.log('Graduado actualizado:', graduadoActualizado);
+
+                return res.json(graduadoActualizado);
+              }
+            } catch (error) {
+              console.error(`Error al buscar coordenadas para "${query}":`, error);
+              continue; // Intentar con la siguiente query
+            }
+          }
+
+          // Si ninguna búsqueda funcionó, actualizar solo el estado
+          console.log('No se pudieron obtener coordenadas para ninguna de las queries');
+        } catch (error) {
+          console.error('Error en el proceso de geocodificación:', error);
+        }
+      }
+
+      // Si no se actualizó la ubicación o falló la geocodificación, actualizar solo el estado
       await graduado.update({ 
         estado,
         observaciones_admin: observaciones 
       });
 
-      // Intentar enviar correo según el estado, pero no fallar si no se puede
-      try {
-        if (estado === 'aprobado') {
-          await EmailService.sendApprovalEmail(
-            graduado.email,
-            `${graduado.nombre} ${graduado.apellido}`
-          );
-        } else if (estado === 'rechazado') {
-          await EmailService.sendRejectionEmail(
-            graduado.email,
-            `${graduado.nombre} ${graduado.apellido}`,
-            observaciones || 'No se proporcionó un motivo específico'
-          );
-        }
-      } catch (emailError) {
-        console.error('Error al enviar correo:', emailError);
-        // No fallamos si el correo no se puede enviar
-      }
+      // Recargar el graduado para obtener los datos actualizados
+      const graduadoActualizado = await Graduado.findByPk(id);
+      console.log('Graduado actualizado:', graduadoActualizado);
 
-      res.json(graduado);
+      res.json(graduadoActualizado);
     } catch (error) {
       console.error('Error al actualizar estado del graduado:', error);
       res.status(500).json({ error: 'Error al actualizar estado del graduado' });
@@ -341,8 +388,79 @@ export const graduadoController = {
         return res.status(404).json({ error: 'Graduado no encontrado' });
       }
 
-      const { nombre, apellido, email, carrera, anio_graduacion, ciudad, pais, institucion, linkedin, biografia, latitud, longitud } = req.body;
+      const { nombre, apellido, email, carrera, anio_graduacion, ciudad, pais, institucion, linkedin, biografia } = req.body;
 
+      // Intentar obtener coordenadas si se actualizó la ubicación
+      if (ciudad !== graduado.ciudad || pais !== graduado.pais || institucion !== graduado.institucion) {
+        try {
+          // Intentar diferentes combinaciones de búsqueda
+          const queries = [
+            institucion ? `${institucion}, ${ciudad}, ${pais}` : null,
+            `${ciudad}, ${pais}`,
+            pais
+          ].filter((query): query is string => query !== null);
+
+          console.log('Intentando obtener coordenadas con las siguientes queries:', queries);
+
+          for (const query of queries) {
+            try {
+              const response = await axios.get(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
+                { 
+                  timeout: 5000,
+                  headers: {
+                    'User-Agent': 'GraduadosUNICEN/1.0'
+                  }
+                }
+              );
+
+              if (response.data && response.data.length > 0) {
+                const lat = parseFloat(response.data[0].lat);
+                const lon = parseFloat(response.data[0].lon);
+                console.log(`Coordenadas obtenidas para "${query}":`, { lat, lon });
+                
+                // Actualizar el graduado con las nuevas coordenadas
+                await graduado.update({
+                  nombre,
+                  apellido,
+                  email,
+                  carrera,
+                  anio_graduacion,
+                  ciudad,
+                  pais,
+                  institucion,
+                  linkedin,
+                  biografia,
+                  latitud: lat,
+                  longitud: lon
+                });
+
+                // Generar nuevo token
+                const token = jwt.sign(
+                  { id: graduado.id, isAdmin: false },
+                  env.jwtSecret,
+                  { expiresIn: '24h' }
+                );
+
+                return res.json({
+                  ...graduado.toJSON(),
+                  token
+                });
+              }
+            } catch (error) {
+              console.error(`Error al buscar coordenadas para "${query}":`, error);
+              continue; // Intentar con la siguiente query
+            }
+          }
+
+          // Si ninguna búsqueda funcionó, actualizar sin coordenadas
+          console.log('No se pudieron obtener coordenadas para ninguna de las queries');
+        } catch (error) {
+          console.error('Error en el proceso de geocodificación:', error);
+        }
+      }
+
+      // Si no se actualizó la ubicación o falló la geocodificación, actualizar sin coordenadas
       await graduado.update({
         nombre,
         apellido,
@@ -353,9 +471,7 @@ export const graduadoController = {
         pais,
         institucion,
         linkedin,
-        biografia,
-        latitud,
-        longitud
+        biografia
       });
 
       // Generar nuevo token
@@ -462,7 +578,28 @@ export const graduadoController = {
         }
       }
 
+      // Guardar cambios en la base de datos
       await graduado.save()
+
+      // Intentar enviar correo según el estado, pero no fallar si no se puede
+      try {
+        if (estado === 'aprobado') {
+          await EmailService.sendApprovalEmail(
+            graduado.email,
+            `${graduado.nombre} ${graduado.apellido}`
+          )
+        } else if (estado === 'rechazado') {
+          await EmailService.sendRejectionEmail(
+            graduado.email,
+            `${graduado.nombre} ${graduado.apellido}`,
+            'No se proporcionó un motivo específico'
+          )
+        }
+      } catch (emailError) {
+        console.error('Error al enviar correo:', emailError)
+        // No fallamos si el correo no se puede enviar
+      }
+
       res.json(graduado)
     } catch (error) {
       console.error('Error al actualizar estado:', error)

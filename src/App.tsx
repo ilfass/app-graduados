@@ -47,7 +47,14 @@ const App = () => {
                 />
 
                 {/* Rutas públicas */}
-                <Route path="/mapa" element={<GraduadosMap />} />
+                <Route 
+                  path="/mapa" 
+                  element={
+                    <ProtectedRoute requiredUserType="admin">
+                      <GraduadosMap />
+                    </ProtectedRoute>
+                  } 
+                />
                 <Route path="/busqueda" element={<Busqueda />} />
               </Routes>
             </Box>

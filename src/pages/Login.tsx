@@ -15,11 +15,15 @@ import {
   TabList,
   TabPanels,
   Tab,
-  TabPanel
+  TabPanel,
+  InputGroup,
+  InputRightElement,
+  IconButton
 } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { graduadoService, adminService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -28,6 +32,7 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -43,6 +48,7 @@ const Login = () => {
 
     try {
       const service = isAdmin ? adminService : graduadoService;
+      console.log('Intentando login como:', isAdmin ? 'admin' : 'graduado');
       const response = await service.login(formData.email, formData.password);
       
       localStorage.setItem('token', response.token);
@@ -87,7 +93,10 @@ const Login = () => {
           </Heading>
         </Box>
 
-        <Tabs isFitted variant="enclosed" onChange={(index) => setIsAdmin(index === 1)}>
+        <Tabs isFitted variant="enclosed" onChange={(index) => {
+          setIsAdmin(index === 1);
+          setFormData({ email: '', password: '' }); // Limpiar el formulario al cambiar de pestaña
+        }}>
           <TabList mb="1em">
             <Tab>Graduado</Tab>
             <Tab>Administrador</Tab>
@@ -110,13 +119,24 @@ const Login = () => {
 
                   <FormControl isRequired>
                     <FormLabel>Contraseña</FormLabel>
-                    <Input
-                      name="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Tu contraseña"
-                    />
+                    <InputGroup>
+                      <Input
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Tu contraseña"
+                      />
+                      <InputRightElement>
+                        <IconButton
+                          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                          onClick={() => setShowPassword(!showPassword)}
+                          variant="ghost"
+                          size="sm"
+                        />
+                      </InputRightElement>
+                    </InputGroup>
                   </FormControl>
 
                   <Button
@@ -160,13 +180,24 @@ const Login = () => {
 
                   <FormControl isRequired>
                     <FormLabel>Contraseña</FormLabel>
-                    <Input
-                      name="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Tu contraseña"
-                    />
+                    <InputGroup>
+                      <Input
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={formData.password}
+                        onChange={handleChange}
+                        placeholder="Tu contraseña"
+                      />
+                      <InputRightElement>
+                        <IconButton
+                          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                          onClick={() => setShowPassword(!showPassword)}
+                          variant="ghost"
+                          size="sm"
+                        />
+                      </InputRightElement>
+                    </InputGroup>
                   </FormControl>
 
                   <Button
