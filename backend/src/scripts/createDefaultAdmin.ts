@@ -7,7 +7,7 @@ const createDefaultAdmin = async () => {
     await syncDatabase()
 
     // Verificar si ya existe un administrador
-    const existingAdmin = await AdministradorModel.findByEmail('admin@unicen.edu.ar')
+    const existingAdmin = await AdministradorModel.findByEmail('relaciones.internacionales@rec.unicen.edu.ar')
 
     if (existingAdmin) {
       console.log('El administrador por defecto ya existe')
@@ -18,8 +18,8 @@ const createDefaultAdmin = async () => {
     await AdministradorModel.create({
       nombre: 'Admin',
       apellido: 'UNICEN',
-      email: 'admin@unicen.edu.ar',
-      password: 'admin123'
+      email: 'relaciones.internacionales@rec.unicen.edu.ar',
+      password: 'internacionales1900'
     })
 
     console.log('Administrador por defecto creado exitosamente')

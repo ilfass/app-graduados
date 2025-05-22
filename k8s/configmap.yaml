@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: graduados-config
+  namespace: web-internacionales-mapa
+data:
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "587"
+  SMTP_SECURE: "false"
+  SMTP_FROM: "relaciones.internacionales@rec.unicen.edu.ar"
+  FRONTEND_URL: "https://internacionalesmapa.nuevo.unicen.edu.ar/graduados"
+  DB_PATH: "/app/data/database.sqlite"
+  ADMIN_EMAIL: "relaciones.internacionales@rec.unicen.edu.ar" 

@@ -9,7 +9,7 @@ const Navbar = () => {
     <Box bg="blue.500" px={4} py={4}>
       <Flex maxW="container.xl" mx="auto" justify="space-between" align="center">
         <RouterLink to="/" style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold', textDecoration: 'none' }}>
-          Red de Graduados UNICEN
+          INICIO
         </RouterLink>
 
         <Flex gap={4}>

@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 
 export class EmailService {
   // Enviar correo de registro exitoso
-  static async sendRegistrationEmail(email: string, nombre: string) {
+  static async sendRegistrationEmail(email: string, nombre: string, datos: any) {
     const mailOptions = {
       from: env.smtp.from,
       to: email,
@@ -22,8 +22,18 @@ export class EmailService {
       html: `
         <h1>¡Bienvenido a la Red de Graduados UNICEN!</h1>
         <p>Hola ${nombre},</p>
-        <p>Tu registro ha sido recibido exitosamente. Estamos procesando tu solicitud y te notificaremos cuando sea aprobada.</p>
-        <p>Mientras tanto, puedes acceder a tu perfil usando tu correo electrónico.</p>
+        <p>Tu registro ha sido recibido exitosamente en Internacionales.unicen.edu.ar como graduado.</p>
+        <p>Datos de tu registro:</p>
+        <ul>
+          <li>Nombre: ${datos.nombre} ${datos.apellido}</li>
+          <li>Email: ${datos.email}</li>
+          <li>Carrera: ${datos.carrera}</li>
+          <li>Año de graduación: ${datos.anio_graduacion}</li>
+          <li>Ciudad: ${datos.ciudad}</li>
+          <li>País: ${datos.pais}</li>
+        </ul>
+        <p>Estamos procesando tu solicitud y te notificaremos cuando sea aprobada.</p>
+        <p>Puedes acceder a la plataforma en: <a href="${env.frontendUrl}">${env.frontendUrl}</a></p>
         <p>Saludos cordiales,<br>Equipo de la Red de Graduados UNICEN</p>
       `
     }

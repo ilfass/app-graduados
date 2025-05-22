@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graduados-frontend
+  namespace: web-internacionales-mapa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graduados-frontend
+  template:
+    metadata:
+      labels:
+        app: graduados-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: graduados-frontend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_API_URL
+          value: "/graduados/api" 

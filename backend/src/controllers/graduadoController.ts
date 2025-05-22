@@ -78,6 +78,18 @@ export const graduadoController = {
         estado: 'pendiente' // Estado inicial
       })
 
+      // Enviar correo de registro exitoso
+      try {
+        await EmailService.sendRegistrationEmail(
+          graduado.email,
+          `${graduado.nombre} ${graduado.apellido}`,
+          datosProcesados
+        )
+      } catch (error) {
+        console.error('Error al enviar correo de registro:', error)
+        // No fallamos el registro si falla el envío del correo
+      }
+
       res.status(201).json({ 
         message: 'Registro exitoso',
         graduado: {

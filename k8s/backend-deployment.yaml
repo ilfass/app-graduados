@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graduados-backend
+  namespace: web-internacionales-mapa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graduados-backend
+  template:
+    metadata:
+      labels:
+        app: graduados-backend
+    spec:
+      initContainers:
+      - name: init-db
+        image: graduados-backend:latest
+        command: ['node', 'dist/scripts/createDefaultAdmin.js']
+        volumeMounts:
+        - name: database-storage
+          mountPath: /app/data
+      containers:
+      - name: backend
+        image: graduados-backend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DB_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: graduados-config
+              key: DB_PATH
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: graduados-secrets
+              key: JWT_SECRET
+        - name: SMTP_USER
+          valueFrom:
+            secretKeyRef:
+              name: graduados-secrets
+              key: SMTP_USER
+        - name: SMTP_PASS
+          valueFrom:
+            secretKeyRef:
+              name: graduados-secrets
+              key: SMTP_PASS
+        volumeMounts:
+        - name: database-storage
+          mountPath: /app/data
+      volumes:
+      - name: database-storage
+        persistentVolumeClaim:
+          claimName: graduados-db-pvc 
