@@ -24,14 +24,14 @@ spec:
   - host: internacionalesgraduados.nuevo.unicen.edu.ar
     http:
       paths:
-      - path: /graduados(/|$)(.*)
+      - path: /graduados/
         pathType: Prefix
         backend:
           service:
             name: graduados-frontend
             port:
               number: 80
-      - path: /graduados/api(/|$)(.*)
+      - path: /graduados/api/
         pathType: Prefix
         backend:
           service:
