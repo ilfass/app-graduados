@@ -24,6 +24,7 @@ import Configuracion from './admin/Configuracion';
 import { useEffect, useState } from 'react';
 import { adminService } from '../services/api';
 import { Link as RouterLink } from 'react-router-dom';
+import { GraduadosMap } from '../components/GraduadosMap';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -141,16 +142,102 @@ const Dashboard = () => {
               </Button>
 
               <Button
-                as={RouterLink}
-                to="/mapa"
+                onClick={async () => {
+                  try {
+                    const response = await adminService.getGraduados();
+                    // Verificar que tenemos datos válidos
+                    if (!response || !Array.isArray(response)) {
+                      throw new Error('No se recibieron datos válidos');
+                    }
+                    
+                    // Crear encabezados del CSV
+                    const headers = [
+                      'ID',
+                      'Nombre',
+                      'Apellido',
+                      'Email',
+                      'Carrera',
+                      'Institución',
+                      'Año Graduación',
+                      'Ciudad',
+                      'País',
+                      'Estado',
+                      'LinkedIn',
+                      'Latitud',
+                      'Longitud'
+                    ].join(',');
+
+                    // Convertir datos a formato CSV
+                    const csvRows = response.map((graduado: {
+                      id: number;
+                      nombre: string;
+                      apellido: string;
+                      email: string;
+                      carrera: string;
+                      institucion?: string;
+                      anio_graduacion: number;
+                      ciudad?: string;
+                      pais?: string;
+                      estado: string;
+                      linkedin?: string;
+                      latitud?: number;
+                      longitud?: number;
+                    }) => [
+                      graduado.id,
+                      `"${graduado.nombre}"`,
+                      `"${graduado.apellido}"`,
+                      `"${graduado.email}"`,
+                      `"${graduado.carrera}"`,
+                      `"${graduado.institucion || ''}"`,
+                      graduado.anio_graduacion,
+                      `"${graduado.ciudad || ''}"`,
+                      `"${graduado.pais || ''}"`,
+                      `"${graduado.estado}"`,
+                      `"${graduado.linkedin || ''}"`,
+                      graduado.latitud || '',
+                      graduado.longitud || ''
+                    ].join(','));
+
+                    // Combinar encabezados y datos
+                    const csvContent = [headers, ...csvRows].join('\n');
+
+                    // Crear y descargar archivo
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `graduados_${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    toast({
+                      title: 'Éxito',
+                      description: 'Datos de graduados exportados correctamente',
+                      status: 'success',
+                      duration: 3000,
+                      isClosable: true,
+                    });
+                  } catch (error) {
+                    console.error('Error al exportar datos:', error);
+                    toast({
+                      title: 'Error',
+                      description: 'No se pudieron exportar los datos de los graduados',
+                      status: 'error',
+                      duration: 3000,
+                      isClosable: true,
+                    });
+                  }
+                }}
                 colorScheme="green"
                 size="lg"
                 height="100px"
               >
                 <VStack>
-                  <Text>Ver Mapa</Text>
+                  <Text>Exportar Datos</Text>
                   <Text fontSize="sm" color="gray.500">
-                    Visualizar graduados en el mapa
+                    Descargar datos de graduados en CSV
                   </Text>
                 </VStack>
               </Button>
@@ -184,6 +271,24 @@ const Dashboard = () => {
                 </VStack>
               </Button>
             </SimpleGrid>
+          </VStack>
+        </Box>
+
+        {/* Mapa de Graduados */}
+        <Box p={6} borderRadius="lg" bg="white" boxShadow="md">
+          <VStack spacing={6} align="stretch">
+            <Heading as="h2" size="lg">
+              Mapa de Graduados
+            </Heading>
+            <Box 
+              w="100%" 
+              h="500px" 
+              borderRadius="xl" 
+              overflow="hidden"
+              boxShadow="md"
+            >
+              <GraduadosMap />
+            </Box>
           </VStack>
         </Box>
       </VStack>

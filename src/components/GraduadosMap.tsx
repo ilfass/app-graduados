@@ -97,7 +97,7 @@ export const GraduadosMap = () => {
   }
 
   return (
-    <Box w="100%" h="100%" position="relative">
+    <Box w="100%" h="100%" position="relative" minH="400px">
       <IconButton
         aria-label={isFullscreen ? "Salir de pantalla completa" : "Ver en pantalla completa"}
         icon={isFullscreen ? <FiMinimize2 /> : <FiMaximize2 />}
@@ -113,12 +113,12 @@ export const GraduadosMap = () => {
         _hover={{ transform: 'scale(1.1)' }}
         transition="all 0.2s"
       />
-      <Box ref={mapContainerRef} w="100%" h="100%">
+      <Box ref={mapContainerRef} w="100%" h="100%" minH="400px">
         <MapContainer
           center={[0, 0]} // Centro del mundo
           zoom={2} // Zoom más alejado para ver el mundo completo
           minZoom={2} // Evitar que se pueda hacer zoom out más allá del mundo completo
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: '100%', width: '100%', minHeight: '400px' }}
           scrollWheelZoom={true}
         >
           <TileLayer
