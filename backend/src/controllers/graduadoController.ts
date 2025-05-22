@@ -8,6 +8,7 @@ import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
 import axios from 'axios'
+import { Op } from 'sequelize'
 
 // Configuración de multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
@@ -610,6 +611,39 @@ export const graduadoController = {
     } catch (error) {
       console.error('Error al actualizar estado:', error)
       res.status(500).json({ message: 'Error al actualizar estado' })
+    }
+  },
+
+  // Obtener graduados para el mapa (ruta pública)
+  async getForMap(req: Request, res: Response) {
+    try {
+      const graduados = await Graduado.findAll({
+        where: {
+          estado: 'aprobado',
+          latitud: {
+            [Op.not]: null
+          },
+          longitud: {
+            [Op.not]: null
+          }
+        },
+        attributes: [
+          'id',
+          'nombre',
+          'apellido',
+          'carrera',
+          'ciudad',
+          'pais',
+          'institucion',
+          'anio_graduacion',
+          'latitud',
+          'longitud'
+        ]
+      });
+      res.json(graduados);
+    } catch (error) {
+      console.error('Error al obtener graduados para el mapa:', error);
+      res.status(500).json({ message: 'Error al obtener graduados para el mapa' });
     }
   },
 } 

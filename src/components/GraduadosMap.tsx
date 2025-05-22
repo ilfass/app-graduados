@@ -1,9 +1,10 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { Icon } from 'leaflet'
-import { useEffect, useState } from 'react'
-import { Box, Text, VStack } from '@chakra-ui/react'
+import { useEffect, useState, useRef } from 'react'
+import { Box, Text, VStack, IconButton, useToast } from '@chakra-ui/react'
 import { graduadoService } from '../services/api'
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi'
 
 // Corregir el problema con los íconos de Leaflet
 const icon = new Icon({
@@ -34,19 +35,38 @@ export const GraduadosMap = () => {
   const [graduados, setGraduados] = useState<Graduado[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+  const toast = useToast()
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      mapContainerRef.current?.requestFullscreen()
+      setIsFullscreen(true)
+    } else {
+      document.exitFullscreen()
+      setIsFullscreen(false)
+    }
+  }
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [])
 
   useEffect(() => {
     const fetchGraduados = async () => {
       try {
-        console.log('Iniciando carga de graduados...')
-        const response = await graduadoService.getAll()
-        console.log('Respuesta del servicio:', response)
-        
+        const response = await graduadoService.getForMap()
         if (response.data && Array.isArray(response.data)) {
-          console.log('Graduados recibidos:', response.data)
           setGraduados(response.data)
         } else {
-          console.error('Formato de respuesta inválido:', response)
           setError('Error en el formato de los datos')
         }
         setLoading(false)
@@ -62,7 +82,7 @@ export const GraduadosMap = () => {
 
   if (loading) {
     return (
-      <Box p={4}>
+      <Box p={4} textAlign="center">
         <Text>Cargando mapa...</Text>
       </Box>
     )
@@ -70,53 +90,62 @@ export const GraduadosMap = () => {
 
   if (error) {
     return (
-      <Box p={4}>
+      <Box p={4} textAlign="center">
         <Text color="red.500">{error}</Text>
       </Box>
     )
   }
 
-  console.log('Renderizando mapa con graduados:', graduados)
-
   return (
-    <VStack spacing={4} align="stretch" w="100%" h="600px">
-      <Text fontSize="xl" fontWeight="bold">
-        Mapa de Graduados UNICEN
-      </Text>
-      <Box w="100%" h="100%" borderRadius="lg" overflow="hidden">
+    <Box w="100%" h="100%" position="relative">
+      <IconButton
+        aria-label={isFullscreen ? "Salir de pantalla completa" : "Ver en pantalla completa"}
+        icon={isFullscreen ? <FiMinimize2 /> : <FiMaximize2 />}
+        position="absolute"
+        top={4}
+        right={4}
+        zIndex={1000}
+        onClick={toggleFullscreen}
+        colorScheme="blue"
+        size="lg"
+        borderRadius="full"
+        boxShadow="md"
+        _hover={{ transform: 'scale(1.1)' }}
+        transition="all 0.2s"
+      />
+      <Box ref={mapContainerRef} w="100%" h="100%">
         <MapContainer
-          center={[-37.3217, -59.1332]} // Coordenadas de Tandil
-          zoom={4}
+          center={[0, 0]} // Centro del mundo
+          zoom={2} // Zoom más alejado para ver el mundo completo
+          minZoom={2} // Evitar que se pueda hacer zoom out más allá del mundo completo
           style={{ height: '100%', width: '100%' }}
+          scrollWheelZoom={true}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          {graduados.map((graduado) => {
-            console.log('Renderizando marcador para:', graduado)
-            return (
-              <Marker
-                key={graduado.id}
-                position={[graduado.latitud, graduado.longitud]}
-                icon={icon}
-              >
-                <Popup>
-                  <div className="p-2">
-                    <h3 className="font-semibold text-lg mb-1">
-                      {graduado.nombre} {graduado.apellido}
-                    </h3>
-                    <p className="text-gray-600">{graduado.carrera}</p>
-                    <p className="text-gray-500 text-sm">
-                      {graduado.ciudad}, {graduado.pais}
-                    </p>
-                  </div>
-                </Popup>
-              </Marker>
-            )
-          })}
+          {graduados.map((graduado) => (
+            <Marker
+              key={graduado.id}
+              position={[graduado.latitud, graduado.longitud]}
+              icon={icon}
+            >
+              <Popup>
+                <div className="p-2">
+                  <h3 className="font-semibold text-lg mb-1">
+                    {graduado.nombre} {graduado.apellido}
+                  </h3>
+                  <p className="text-gray-600">{graduado.carrera}</p>
+                  <p className="text-gray-500 text-sm">
+                    {graduado.ciudad}, {graduado.pais}
+                  </p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
         </MapContainer>
       </Box>
-    </VStack>
+    </Box>
   )
 } 

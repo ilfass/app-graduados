@@ -7,6 +7,7 @@ const router = Router()
 // Rutas públicas
 router.post('/register', graduadoController.register)
 router.post('/login', graduadoController.login)
+router.get('/mapa', graduadoController.getForMap)
 
 // Rutas protegidas
 router.get('/profile', auth, graduadoController.getProfile)

@@ -50,14 +50,7 @@ const AppRoutes = () => {
         />
 
         {/* Rutas públicas */}
-        <Route 
-          path="/mapa" 
-          element={
-            <ProtectedRoute requiredUserType="admin">
-              <GraduadosMap />
-            </ProtectedRoute>
-          } 
-        />
+        <Route path="/mapa" element={<GraduadosMap />} />
         <Route path="/busqueda" element={<Busqueda />} />
       </Routes>
       <NavigationButtons />

@@ -1,5 +1,5 @@
 import { ChakraProvider, ChakraTheme } from '@chakra-ui/react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Box } from '@chakra-ui/react'
 import Navbar from './components/Navbar'
 import NavigationButtons from './components/NavigationButtons'
@@ -28,7 +28,7 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/" element={<Home />} />
                 
                 {/* Rutas protegidas para administradores */}
                 <Route
@@ -60,14 +60,7 @@ const App = () => {
                 />
 
                 {/* Rutas públicas */}
-                <Route 
-                  path="/mapa" 
-                  element={
-                    <ProtectedRoute requiredUserType="admin">
-                      <GraduadosMap />
-                    </ProtectedRoute>
-                  } 
-                />
+                <Route path="/mapa" element={<GraduadosMap />} />
                 <Route path="/busqueda" element={<Busqueda />} />
               </Routes>
             </Box>

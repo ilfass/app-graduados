@@ -142,6 +142,11 @@ export const graduadoService = {
     console.log('Graduados válidos:', graduadosValidos);
     return { data: graduadosValidos };
   },
+
+  // Obtener graduados para el mapa (ruta pública)
+  getForMap: () => {
+    return api.get('/graduados/mapa')
+  },
 };
 
 export const adminService = {
