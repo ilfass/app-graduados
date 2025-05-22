@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { Icon } from 'leaflet'
+import { useEffect, useState } from 'react'
 import { Box, Text, VStack } from '@chakra-ui/react'
 import { graduadoService } from '../services/api'
-import L from 'leaflet'
 
-// Configuración de íconos de Leaflet
-const icon = L.icon({
+// Corregir el problema con los íconos de Leaflet
+const icon = new Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
@@ -14,7 +14,7 @@ const icon = L.icon({
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowSize: [41, 41]
-});
+})
 
 interface Graduado {
   id: number
@@ -38,15 +38,15 @@ export const GraduadosMap = () => {
   useEffect(() => {
     const fetchGraduados = async () => {
       try {
-        console.log('Iniciando carga de graduados...');
+        console.log('Iniciando carga de graduados...')
         const response = await graduadoService.getAll()
-        console.log('Respuesta del servicio:', response);
+        console.log('Respuesta del servicio:', response)
         
         if (response.data && Array.isArray(response.data)) {
-          console.log('Graduados recibidos:', response.data);
+          console.log('Graduados recibidos:', response.data)
           setGraduados(response.data)
         } else {
-          console.error('Formato de respuesta inválido:', response);
+          console.error('Formato de respuesta inválido:', response)
           setError('Error en el formato de los datos')
         }
         setLoading(false)
@@ -76,7 +76,7 @@ export const GraduadosMap = () => {
     )
   }
 
-  console.log('Renderizando mapa con graduados:', graduados);
+  console.log('Renderizando mapa con graduados:', graduados)
 
   return (
     <VStack spacing={4} align="stretch" w="100%" h="600px">
@@ -94,7 +94,7 @@ export const GraduadosMap = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           {graduados.map((graduado) => {
-            console.log('Renderizando marcador para:', graduado);
+            console.log('Renderizando marcador para:', graduado)
             return (
               <Marker
                 key={graduado.id}
@@ -102,22 +102,18 @@ export const GraduadosMap = () => {
                 icon={icon}
               >
                 <Popup>
-                  <VStack align="start" spacing={1}>
-                    <Text fontWeight="bold">
+                  <div className="p-2">
+                    <h3 className="font-semibold text-lg mb-1">
                       {graduado.nombre} {graduado.apellido}
-                    </Text>
-                    <Text>Carrera: {graduado.carrera}</Text>
-                    <Text>Año de graduación: {graduado.anio_graduacion}</Text>
-                    {graduado.institucion && (
-                      <Text>Institución: {graduado.institucion}</Text>
-                    )}
-                    <Text>
-                      Ubicación: {graduado.ciudad}, {graduado.pais}
-                    </Text>
-                  </VStack>
+                    </h3>
+                    <p className="text-gray-600">{graduado.carrera}</p>
+                    <p className="text-gray-500 text-sm">
+                      {graduado.ciudad}, {graduado.pais}
+                    </p>
+                  </div>
                 </Popup>
               </Marker>
-            );
+            )
           })}
         </MapContainer>
       </Box>
