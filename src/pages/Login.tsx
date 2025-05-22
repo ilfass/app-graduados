@@ -11,14 +11,8 @@ import {
   useToast,
   Text,
   Link,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
   InputGroup,
   InputRightElement,
-  IconButton
 } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { graduadoService, adminService } from '../services/api';
@@ -31,7 +25,6 @@ const Login = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
@@ -47,29 +40,45 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const service = isAdmin ? adminService : graduadoService;
-      console.log('Intentando login como:', isAdmin ? 'admin' : 'graduado');
-      const response = await service.login(formData.email, formData.password);
-      
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('userType', isAdmin ? 'admin' : 'graduado');
-      
-      if (!isAdmin && response.graduado) {
-        localStorage.setItem('graduadoId', response.graduado.id.toString());
-      }
-      
-      login(response.token, isAdmin ? 'admin' : 'graduado');
-      
-      toast({
-        title: 'Inicio de sesión exitoso',
-        status: 'success',
-        duration: 3000,
-        isClosable: true
-      });
+      // Primero intentamos como administrador
+      try {
+        const adminResponse = await adminService.login(formData.email, formData.password);
+        localStorage.setItem('token', adminResponse.token);
+        localStorage.setItem('userType', 'admin');
+        login(adminResponse.token, 'admin');
+        
+        toast({
+          title: 'Inicio de sesión exitoso',
+          description: 'Bienvenido administrador',
+          status: 'success',
+          duration: 3000,
+          isClosable: true
+        });
 
-      setTimeout(() => {
-        navigate(isAdmin ? '/admin/dashboard' : '/profile');
-      }, 100);
+        navigate('/admin/dashboard');
+        return;
+      } catch (error) {
+        // Si falla como admin, intentamos como graduado
+        const graduadoResponse = await graduadoService.login(formData.email, formData.password);
+        localStorage.setItem('token', graduadoResponse.token);
+        localStorage.setItem('userType', 'graduado');
+        
+        if (graduadoResponse.graduado) {
+          localStorage.setItem('graduadoId', graduadoResponse.graduado.id.toString());
+        }
+        
+        login(graduadoResponse.token, 'graduado');
+        
+        toast({
+          title: 'Inicio de sesión exitoso',
+          description: 'Bienvenido graduado',
+          status: 'success',
+          duration: 3000,
+          isClosable: true
+        });
+
+        navigate('/profile');
+      }
     } catch (error) {
       console.error('Error en login:', error);
       toast({
@@ -95,130 +104,67 @@ const Login = () => {
           <Heading as="h1" size="xl" mb={4}>
             Iniciar Sesión
           </Heading>
+          <Text color="gray.600" mb={8}>
+            Ingresa tus credenciales para acceder al sistema
+          </Text>
         </Box>
 
-        <Tabs isFitted variant="enclosed" onChange={(index) => {
-          setIsAdmin(index === 1);
-          setFormData({ email: '', password: '' }); // Limpiar el formulario al cambiar de pestaña
-        }}>
-          <TabList mb="1em">
-            <Tab>Graduado</Tab>
-            <Tab>Administrador</Tab>
-          </TabList>
+        <Box as="form" onSubmit={handleSubmit}>
+          <VStack spacing={4}>
+            <FormControl isRequired>
+              <FormLabel>Email</FormLabel>
+              <Input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="tu@email.com"
+              />
+            </FormControl>
 
-          <TabPanels>
-            <TabPanel>
-              <Box as="form" onSubmit={handleSubmit}>
-                <VStack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>Email</FormLabel>
-                    <Input
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="tu@email.com"
-                    />
-                  </FormControl>
-
-                  <FormControl isRequired>
-                    <FormLabel>Contraseña</FormLabel>
-                    <InputGroup>
-                      <Input
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Tu contraseña"
-                      />
-                      <InputRightElement width="4.5rem">
-                        <Button h="1.75rem" size="sm" onClick={handleShowPassword}>
-                          {showPassword ? 'Ocultar' : 'Mostrar'}
-                        </Button>
-                      </InputRightElement>
-                    </InputGroup>
-                  </FormControl>
-
-                  <Box textAlign="right">
-                    <Link as={RouterLink} to="/forgot-password" color="blue.500">
-                      ¿Olvidaste tu contraseña?
-                    </Link>
-                  </Box>
-
-                  <Button
-                    type="submit"
-                    colorScheme="blue"
-                    size="lg"
-                    width="full"
-                    mt={4}
-                    isLoading={loading}
-                  >
-                    Iniciar Sesión
+            <FormControl isRequired>
+              <FormLabel>Contraseña</FormLabel>
+              <InputGroup>
+                <Input
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Tu contraseña"
+                />
+                <InputRightElement width="4.5rem">
+                  <Button h="1.75rem" size="sm" onClick={handleShowPassword}>
+                    {showPassword ? 'Ocultar' : 'Mostrar'}
                   </Button>
+                </InputRightElement>
+              </InputGroup>
+            </FormControl>
 
-                  <Text mt={4}>
-                    ¿No tienes una cuenta?{' '}
-                    <Link as={RouterLink} to="/register" color="blue.500">
-                      Regístrate aquí
-                    </Link>
-                  </Text>
-                </VStack>
-              </Box>
-            </TabPanel>
+            <Box textAlign="right" width="100%">
+              <Link as={RouterLink} to="/forgot-password" color="blue.500">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </Box>
 
-            <TabPanel>
-              <Box as="form" onSubmit={handleSubmit}>
-                <VStack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>Email</FormLabel>
-                    <Input
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="admin@unicen.edu.ar"
-                    />
-                  </FormControl>
+            <Button
+              type="submit"
+              colorScheme="blue"
+              size="lg"
+              width="full"
+              mt={4}
+              isLoading={loading}
+            >
+              Iniciar Sesión
+            </Button>
 
-                  <FormControl isRequired>
-                    <FormLabel>Contraseña</FormLabel>
-                    <InputGroup>
-                      <Input
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Tu contraseña"
-                      />
-                      <InputRightElement width="4.5rem">
-                        <Button h="1.75rem" size="sm" onClick={handleShowPassword}>
-                          {showPassword ? 'Ocultar' : 'Mostrar'}
-                        </Button>
-                      </InputRightElement>
-                    </InputGroup>
-                  </FormControl>
-
-                  <Box textAlign="right">
-                    <Link as={RouterLink} to="/forgot-password" color="blue.500">
-                      ¿Olvidaste tu contraseña?
-                    </Link>
-                  </Box>
-
-                  <Button
-                    type="submit"
-                    colorScheme="blue"
-                    size="lg"
-                    width="full"
-                    mt={4}
-                    isLoading={loading}
-                  >
-                    Iniciar Sesión
-                  </Button>
-                </VStack>
-              </Box>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+            <Text mt={4} textAlign="center">
+              ¿No tienes una cuenta?{' '}
+              <Link as={RouterLink} to="/register" color="blue.500">
+                Regístrate aquí
+              </Link>
+            </Text>
+          </VStack>
+        </Box>
       </VStack>
     </Container>
   );
