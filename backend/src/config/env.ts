@@ -2,7 +2,19 @@ import dotenv from 'dotenv'
 import path from 'path'
 
 // Cargar variables de entorno
-dotenv.config({ path: path.join(__dirname, '../../.env') })
+const result = dotenv.config({ path: path.join(__dirname, '../../.env') })
+
+if (result.error) {
+  console.error('Error al cargar el archivo .env:', result.error)
+  process.exit(1)
+}
+
+console.log('Variables de entorno cargadas:', {
+  port: process.env.PORT,
+  jwtSecret: process.env.JWT_SECRET ? 'Configurado' : 'No configurado',
+  smtpUser: process.env.SMTP_USER ? 'Configurado' : 'No configurado',
+  smtpPass: process.env.SMTP_PASS ? 'Configurado' : 'No configurado'
+})
 
 export const env = {
   // Servidor

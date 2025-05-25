@@ -1,11 +1,24 @@
 import express from 'express'
 import cors from 'cors'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 import { sequelize } from './config/database'
 import graduadoRoutes from './routes/graduadoRoutes'
 import authRoutes from './routes/authRoutes'
 import adminRoutes from './routes/adminRoutes'
+import { env } from './config/env'
 
 const app = express()
+const httpServer = createServer(app)
+const io = new Server(httpServer, {
+  cors: {
+    origin: env.frontendUrl,
+    methods: ['GET', 'POST']
+  }
+})
+
+// Hacer el objeto io disponible en toda la aplicación
+app.set('io', io)
 
 // Middleware
 app.use(cors())
@@ -38,7 +51,7 @@ sequelize.sync()
   })
 
 // Iniciar servidor
-const PORT = process.env.PORT || 3000
-app.listen(PORT, () => {
+const PORT = env.port || 3000
+httpServer.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`)
 }) 

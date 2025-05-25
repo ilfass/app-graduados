@@ -340,86 +340,87 @@ const MapEvents = ({ onMapClick }: { onMapClick: (lat: number, lng: number) => v
 };
 
 const Profile = () => {
-  const [graduado, setGraduado] = useState<PerfilGraduado>({
-    id: 0,
-    nombre: '',
-    apellido: '',
-    email: '',
-    carrera: '',
-    anio_graduacion: 0,
-    ciudad: '',
-    pais: '',
-    institucion: '',
-    linkedin: '',
-    biografia: ''
-  });
+  const [profile, setProfile] = useState<PerfilGraduado | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState<PerfilGraduado | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [address, setAddress] = useState('');
-  const [showMap, setShowMap] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const data = await graduadoService.getProfile();
-        setGraduado(data);
-        if (data.ciudad) {
-          setAddress(data.ciudad);
-        }
-      } catch (error) {
-        console.error('Error al cargar el perfil:', error);
-        setError('Error al cargar el perfil');
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    const token = localStorage.getItem('token');
+    console.log('Token en Profile:', token);
+    if (!token) {
+      setError('No hay sesión activa');
+      setLoading(false);
+      return;
+    }
     fetchProfile();
-  }, []);
+  }, [id]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    if (!graduado) return;
-    
-    setGraduado({
-      ...graduado,
-      [name]: value
-    });
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const data = await graduadoService.getProfile();
+      console.log('Datos del perfil recibidos:', data);
+      setProfile(data);
+      setFormData(data);
+      if (data.latitud && data.longitud) {
+        setSelectedLocation({ lat: data.latitud, lng: data.longitud });
+      }
+    } catch (error) {
+      console.error('Error al obtener el perfil:', error);
+      setError('Error al cargar el perfil');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!graduado) return;
+    if (!formData) return;
 
     try {
       setLoading(true);
-      const updatedProfile = await graduadoService.updateProfile(graduado.id, {
-        nombre: graduado.nombre || '',
-        apellido: graduado.apellido || '',
-        email: graduado.email || '',
-        carrera: graduado.carrera || '',
-        anio_graduacion: parseInt(graduado.anio_graduacion?.toString() || '0'),
-        ciudad: graduado.ciudad || '',
-        pais: graduado.pais || '',
-        institucion: graduado.institucion,
-        linkedin: graduado.linkedin,
-        biografia: graduado.biografia
-      });
+      console.log('Enviando datos de actualización:', formData);
+      
+      // Asegurarse de que latitud y longitud sean números válidos
+      const dataToSend = {
+        ...formData,
+        latitud: formData.latitud ? Number(formData.latitud) : undefined,
+        longitud: formData.longitud ? Number(formData.longitud) : undefined
+      };
 
-      setGraduado(updatedProfile);
+      const updatedProfile = await graduadoService.updateProfile(formData.id, dataToSend);
+      console.log('Perfil actualizado:', updatedProfile);
+      setProfile(updatedProfile);
       setIsEditing(false);
+      setError(null);
+      
+      // Mostrar mensaje de éxito
       alert('Perfil actualizado con éxito');
-    } catch (err) {
-      setError('Error al actualizar el perfil');
-      console.error(err);
+    } catch (error: any) {
+      console.error('Error al actualizar perfil:', error);
+      setError(error.response?.data?.error || 'Error al actualizar el perfil');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (!formData) return;
+    
+    setFormData({
+      ...formData,
+      [name]: value || ''
+    });
   };
 
   const handlePhotoClick = () => {
@@ -478,12 +479,12 @@ const Profile = () => {
   };
 
   const handleConfirmUpload = async () => {
-    if (!selectedFile || !graduado) return;
+    if (!selectedFile || !formData) return;
 
     try {
       setLoading(true);
-      const updatedProfile = await graduadoService.uploadPhoto(graduado.id, selectedFile);
-      setGraduado(updatedProfile);
+      const updatedProfile = await graduadoService.uploadPhoto(formData.id, selectedFile);
+      setProfile(updatedProfile);
       setPreviewUrl(null);
       setSelectedFile(null);
       alert('Foto de perfil actualizada con éxito');
@@ -507,14 +508,14 @@ const Profile = () => {
   const handleLocationSearch = async () => {
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
       );
       const data = await response.json();
       
-      if (data && data.length > 0 && graduado) {
+      if (data && data.length > 0 && formData) {
         const { lat, lon, display_name } = data[0];
-        setGraduado({
-          ...graduado,
+        setFormData({
+          ...formData,
           ciudad: display_name.split(',')[0]?.trim() || '',
           pais: display_name.split(',').slice(-1)[0]?.trim() || '',
           latitud: parseFloat(lat),
@@ -528,20 +529,25 @@ const Profile = () => {
   };
 
   const handleMapClick = (lat: number, lng: number) => {
-    if (!graduado) return;
+    if (!formData) return;
     
-    setGraduado({
-      ...graduado,
+    console.log('Nueva ubicación seleccionada:', { lat, lng });
+    
+    setFormData({
+      ...formData,
       latitud: lat,
       longitud: lng
     });
+
+    // Guardar automáticamente la nueva ubicación
+    handleSubmit(new Event('submit') as any);
   };
 
   const handleExportData = () => {
-    if (!graduado) return;
+    if (!formData) return;
 
     const data = {
-      ...graduado,
+      ...formData,
       fecha_exportacion: new Date().toISOString(),
     };
 
@@ -549,11 +555,29 @@ const Profile = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `perfil_${graduado.nombre}_${graduado.apellido}.json`;
+    a.download = `perfil_${formData.nombre}_${formData.apellido}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleDeleteProfile = async () => {
+    try {
+      setLoading(true);
+      await graduadoService.deleteProfile();
+      setProfile(null);
+      setFormData(null);
+      setError(null);
+      alert('Perfil eliminado con éxito');
+      // Redirigir al login
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error al eliminar el perfil:', error);
+      setError('Error al eliminar el perfil');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -564,7 +588,7 @@ const Profile = () => {
     return <div style={styles.container}>{error}</div>;
   }
 
-  if (!graduado) {
+  if (!profile) {
     return <div style={styles.container}>No se encontró el perfil</div>;
   }
 
@@ -586,7 +610,7 @@ const Profile = () => {
                 <input
                   type="text"
                   name="nombre"
-                  value={graduado.nombre}
+                  value={formData?.nombre}
                   onChange={handleChange}
                   style={styles.input}
                   required
@@ -597,7 +621,7 @@ const Profile = () => {
                 <input
                   type="text"
                   name="apellido"
-                  value={graduado.apellido}
+                  value={formData?.apellido}
                   onChange={handleChange}
                   style={styles.input}
                   required
@@ -608,7 +632,7 @@ const Profile = () => {
                 <input
                   type="text"
                   name="carrera"
-                  value={graduado.carrera}
+                  value={formData?.carrera}
                   onChange={handleChange}
                   style={styles.input}
                   required
@@ -619,7 +643,7 @@ const Profile = () => {
                 <input
                   type="number"
                   name="anio_graduacion"
-                  value={graduado.anio_graduacion}
+                  value={formData?.anio_graduacion}
                   onChange={handleChange}
                   style={styles.input}
                   required
@@ -630,7 +654,7 @@ const Profile = () => {
                 <input
                   type="text"
                   name="institucion"
-                  value={graduado.institucion}
+                  value={formData?.institucion || ''}
                   onChange={handleChange}
                   style={styles.input}
                   placeholder="Institución donde trabaja o estudia actualmente"
@@ -641,7 +665,7 @@ const Profile = () => {
                 <input
                   type="url"
                   name="linkedin"
-                  value={graduado.linkedin}
+                  value={formData?.linkedin || ''}
                   onChange={handleChange}
                   style={styles.input}
                   placeholder="https://linkedin.com/in/tu-perfil"
@@ -651,7 +675,7 @@ const Profile = () => {
                 <label style={styles.label}>Biografía</label>
                 <textarea
                   name="biografia"
-                  value={graduado.biografia}
+                  value={formData?.biografia || ''}
                   onChange={handleChange}
                   style={styles.textarea}
                   placeholder="Cuéntanos sobre ti..."
@@ -662,8 +686,8 @@ const Profile = () => {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
                     type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     style={styles.input}
                     placeholder="Buscar ubicación..."
                   />
@@ -675,9 +699,9 @@ const Profile = () => {
                     Buscar
                   </button>
                 </div>
-                {graduado.latitud && graduado.longitud && (
+                {formData?.latitud && formData.longitud && (
                   <MapContainer
-                    center={[graduado.latitud, graduado.longitud]}
+                    center={[formData.latitud, formData.longitud]}
                     zoom={13}
                     style={mapContainerStyle}
                   >
@@ -685,14 +709,35 @@ const Profile = () => {
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
-                    <Marker position={[graduado.latitud, graduado.longitud]} />
+                    <Marker position={[formData.latitud, formData.longitud]} />
                     <MapEvents onMapClick={handleMapClick} />
                   </MapContainer>
                 )}
               </div>
-              <button type="submit" style={styles.button}>
-                Guardar Cambios
-              </button>
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('¿Estás seguro que deseas eliminar tu perfil? Esta acción no se puede deshacer.')) {
+                      handleDeleteProfile();
+                    }
+                  }}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                  style={{
+                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                    marginRight: '1rem'
+                  }}
+                >
+                  Eliminar Perfil
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {loading ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
             </div>
           </form>
         ) : (
@@ -701,7 +746,7 @@ const Profile = () => {
               <div style={styles.profileHeader}>
                 <div style={styles.avatar} onClick={handlePhotoClick}>
                   <img
-                    src={graduado.foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(`${graduado.nombre}+${graduado.apellido}`)}
+                    src={formData?.foto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(`${formData?.nombre}+${formData?.apellido}`)}
                     alt="Foto de perfil"
                     style={styles.avatarImage}
                   />
@@ -718,9 +763,9 @@ const Profile = () => {
                   style={{ display: 'none' }}
                 />
                 <div style={styles.profileInfo}>
-                  <h2 style={styles.name}>{`${graduado.nombre} ${graduado.apellido}`}</h2>
-                  <p style={styles.career}>{graduado.carrera}</p>
-                  <p style={styles.graduation}>Graduado en {graduado.anio_graduacion}</p>
+                  <h2 style={styles.name}>{`${formData?.nombre} ${formData?.apellido}`}</h2>
+                  <p style={styles.career}>{formData?.carrera}</p>
+                  <p style={styles.graduation}>Graduado en {formData?.anio_graduacion}</p>
                 </div>
               </div>
 
@@ -729,15 +774,15 @@ const Profile = () => {
                 <div style={styles.contactInfo}>
                   <div style={styles.contactItem}>
                     <FiMail />
-                    <a href={`mailto:${graduado.email}`} style={styles.link}>
-                      {graduado.email}
+                    <a href={`mailto:${formData?.email}`} style={styles.link}>
+                      {formData?.email}
                     </a>
                   </div>
-                  {graduado.linkedin && (
+                  {formData?.linkedin && (
                     <div style={styles.contactItem}>
                       <FiLinkedin />
                       <a
-                        href={graduado.linkedin}
+                        href={formData.linkedin}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={styles.link}
@@ -749,30 +794,30 @@ const Profile = () => {
                   <div style={styles.contactItem}>
                     <FiMapPin />
                     <span>
-                      {graduado.ciudad}, {graduado.pais}
+                      {formData?.ciudad}, {formData?.pais}
                     </span>
                   </div>
-                  {graduado.institucion && (
+                  {formData?.institucion && (
                     <div style={styles.contactItem}>
                       <FiMapPin />
-                      <span>Institución Actual: {graduado.institucion}</span>
+                      <span>Institución Actual: {formData.institucion}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {graduado.biografia && (
+              {formData?.biografia && (
                 <div style={styles.section}>
                   <h3 style={styles.bioTitle}>Biografía</h3>
-                  <p>{graduado.biografia}</p>
+                  <p>{formData.biografia}</p>
                 </div>
               )}
 
-              {graduado.latitud && graduado.longitud && (
+              {formData?.latitud && formData.longitud && (
                 <div style={styles.section}>
                   <h3 style={styles.bioTitle}>Ubicación</h3>
                   <MapContainer
-                    center={[graduado.latitud, graduado.longitud]}
+                    center={[formData.latitud, formData.longitud]}
                     zoom={13}
                     style={mapContainerStyle}
                   >
@@ -780,7 +825,7 @@ const Profile = () => {
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     />
-                    <Marker position={[graduado.latitud, graduado.longitud]} />
+                    <Marker position={[formData.latitud, formData.longitud]} />
                   </MapContainer>
                 </div>
               )}

@@ -22,7 +22,7 @@ import { FiUsers, FiMap, FiSearch, FiSettings } from 'react-icons/fi';
 import Graduados from './admin/Graduados';
 import Configuracion from './admin/Configuracion';
 import { useEffect, useState } from 'react';
-import { adminService } from '../services/api';
+import { adminService, graduadoService } from '../services/api';
 import { Link as RouterLink } from 'react-router-dom';
 import { GraduadosMap } from '../components/GraduadosMap';
 
@@ -250,9 +250,47 @@ const Dashboard = () => {
                 height="100px"
               >
                 <VStack>
-                  <Text>Restablecer Contraseñas</Text>
+                  <Text>Restablecer Contraseña</Text>
                   <Text fontSize="sm" color="gray.500">
-                    Gestionar contraseñas de graduados
+                    Cambiar contraseña de usuario
+                  </Text>
+                </VStack>
+              </Button>
+
+              <Button
+                onClick={async () => {
+                  const id = prompt('Ingrese el ID del graduado a eliminar:');
+                  if (id && window.confirm('¿Estás seguro de que deseas eliminar este perfil? Esta acción no se puede deshacer.')) {
+                    try {
+                      await adminService.deleteGraduado(Number(id));
+                      toast({
+                        title: 'Perfil eliminado',
+                        description: 'El perfil ha sido eliminado exitosamente',
+                        status: 'success',
+                        duration: 3000,
+                        isClosable: true,
+                      });
+                      // Recargar estadísticas
+                      loadStats();
+                    } catch (error) {
+                      toast({
+                        title: 'Error',
+                        description: 'No se pudo eliminar el perfil',
+                        status: 'error',
+                        duration: 3000,
+                        isClosable: true,
+                      });
+                    }
+                  }
+                }}
+                colorScheme="red"
+                size="lg"
+                height="100px"
+              >
+                <VStack>
+                  <Text>Eliminar Perfil</Text>
+                  <Text fontSize="sm" color="gray.500">
+                    Eliminar perfil de graduado
                   </Text>
                 </VStack>
               </Button>

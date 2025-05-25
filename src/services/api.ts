@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -14,9 +14,34 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log('Token agregado a la petición:', token);
+  } else {
+    console.log('No se encontró token en localStorage');
   }
   return config;
+}, (error) => {
+  console.error('Error en el interceptor de request:', error);
+  return Promise.reject(error);
 });
+
+// Interceptor para manejar errores de autenticación
+api.interceptors.response.use(
+  (response) => {
+    console.log('Respuesta recibida:', response.status);
+    return response;
+  },
+  (error) => {
+    console.error('Error en la respuesta:', error.response?.status, error.response?.data);
+    if (error.response?.status === 401) {
+      // Solo redirigir al login si no estamos ya en la página de login
+      if (!window.location.pathname.includes('/login')) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export interface Graduado {
   id?: number;
@@ -83,14 +108,38 @@ export const graduadoService = {
     longitud?: number;
   }) => {
     try {
-      const response = await api.put(`/graduados/profile`, data);
+      // Asegurarse de que latitud y longitud sean números válidos
+      const dataToSend = {
+        ...data,
+        latitud: data.latitud ? Number(data.latitud) : undefined,
+        longitud: data.longitud ? Number(data.longitud) : undefined
+      };
+
+      // Validar que los datos sean válidos antes de enviar
+      if (dataToSend.latitud && (isNaN(dataToSend.latitud) || dataToSend.latitud < -90 || dataToSend.latitud > 90)) {
+        throw new Error('Latitud inválida');
+      }
+      if (dataToSend.longitud && (isNaN(dataToSend.longitud) || dataToSend.longitud < -180 || dataToSend.longitud > 180)) {
+        throw new Error('Longitud inválida');
+      }
+
+      console.log('Enviando petición de actualización:', {
+        url: `${API_URL}/graduados/${id}`,
+        data: dataToSend
+      });
+
+      const response = await api.put(`/graduados/${id}`, dataToSend);
+      
+      console.log('Respuesta del servidor:', response.data);
+
       // Actualizar el token si se recibe uno nuevo
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
       }
+
       return response.data;
     } catch (error) {
-      console.error('Error al actualizar perfil:', error);
+      console.error('Error en la actualización del perfil:', error);
       throw error;
     }
   },
@@ -144,9 +193,15 @@ export const graduadoService = {
   },
 
   // Obtener graduados para el mapa (ruta pública)
-  getForMap: () => {
-    return api.get('/graduados/mapa')
+  getForMap: async () => {
+    const response = await api.get('/graduados/mapa');
+    return response.data;
   },
+
+  deleteProfile: async () => {
+    const response = await api.delete('/graduados/profile');
+    return response.data;
+  }
 };
 
 export const adminService = {

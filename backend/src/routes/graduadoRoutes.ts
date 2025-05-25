@@ -10,19 +10,24 @@ router.post('/login', graduadoController.login)
 router.get('/mapa', graduadoController.getForMap)
 
 // Rutas protegidas
-router.get('/profile', auth, graduadoController.getProfile)
-router.put('/profile', auth, graduadoController.updateProfile)
-router.post('/:id/foto', auth, graduadoController.uploadPhoto)
+router.use(auth)
+
+// Rutas protegidas para graduados
+router.get('/profile', graduadoController.getProfile)
+router.put('/:id', graduadoController.update)
+router.post('/:id/foto', graduadoController.uploadPhoto)
 
 // Rutas de administrador
 router.get('/', adminAuth, graduadoController.getAll)
 router.get('/:id', adminAuth, graduadoController.getById)
-router.put('/:id', adminAuth, graduadoController.update)
 router.put('/:id/estado', adminAuth, graduadoController.updateEstado)
 router.put('/:id/reset-password', adminAuth, graduadoController.resetPassword)
 router.delete('/:id', adminAuth, graduadoController.delete)
 
 // Nueva ruta para actualizar estado y calcular coordenadas
 router.put('/:id/status', graduadoController.updateStatus)
+
+// Eliminar perfil del graduado
+router.delete('/profile', graduadoController.deleteProfile)
 
 export default router 

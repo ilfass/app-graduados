@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import { Box, Text, VStack, IconButton, useToast } from '@chakra-ui/react'
 import { graduadoService } from '../services/api'
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi'
+import { io } from 'socket.io-client'
 
 // Corregir el problema con los íconos de Leaflet
 const icon = new Icon({
@@ -38,6 +39,57 @@ export const GraduadosMap = () => {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const toast = useToast()
+  const socketRef = useRef<any>(null)
+
+  const fetchGraduados = async () => {
+    try {
+      const response = await graduadoService.getForMap()
+      console.log('Respuesta del servidor:', response)
+      if (response && Array.isArray(response)) {
+        setGraduados(response)
+      } else {
+        setError('Error en el formato de los datos')
+      }
+      setLoading(false)
+    } catch (err) {
+      console.error('Error al cargar graduados:', err)
+      setError('Error al cargar los graduados')
+      setLoading(false)
+    }
+  }
+
+  // Cargar graduados inicialmente
+  useEffect(() => {
+    fetchGraduados()
+
+    // Configurar Socket.IO
+    socketRef.current = io('http://localhost:3001')
+
+    // Escuchar actualizaciones de graduados
+    socketRef.current.on('graduadoActualizado', (data: { id: number; latitud: number; longitud: number }) => {
+      setGraduados(prevGraduados => 
+        prevGraduados.map(graduado => 
+          graduado.id === data.id 
+            ? { ...graduado, latitud: data.latitud, longitud: data.longitud }
+            : graduado
+        )
+      )
+
+      toast({
+        title: 'Ubicación actualizada',
+        description: 'La ubicación del graduado ha sido actualizada en el mapa',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+    })
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect()
+      }
+    }
+  }, [])
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -58,26 +110,6 @@ export const GraduadosMap = () => {
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
-  }, [])
-
-  useEffect(() => {
-    const fetchGraduados = async () => {
-      try {
-        const response = await graduadoService.getForMap()
-        if (response.data && Array.isArray(response.data)) {
-          setGraduados(response.data)
-        } else {
-          setError('Error en el formato de los datos')
-        }
-        setLoading(false)
-      } catch (err) {
-        console.error('Error al cargar graduados:', err)
-        setError('Error al cargar los graduados')
-        setLoading(false)
-      }
-    }
-
-    fetchGraduados()
   }, [])
 
   if (loading) {
@@ -115,9 +147,9 @@ export const GraduadosMap = () => {
       />
       <Box ref={mapContainerRef} w="100%" h="100%" minH="400px">
         <MapContainer
-          center={[0, 0]} // Centro del mundo
-          zoom={2} // Zoom más alejado para ver el mundo completo
-          minZoom={2} // Evitar que se pueda hacer zoom out más allá del mundo completo
+          center={[0, 0]}
+          zoom={2}
+          minZoom={2}
           style={{ height: '100%', width: '100%', minHeight: '400px' }}
           scrollWheelZoom={true}
         >
@@ -139,6 +171,14 @@ export const GraduadosMap = () => {
                   <p className="text-gray-600">{graduado.carrera}</p>
                   <p className="text-gray-500 text-sm">
                     {graduado.ciudad}, {graduado.pais}
+                  </p>
+                  {graduado.institucion && (
+                    <p className="text-gray-500 text-sm">
+                      {graduado.institucion}
+                    </p>
+                  )}
+                  <p className="text-gray-500 text-sm">
+                    Año de graduación: {graduado.anio_graduacion}
                   </p>
                 </div>
               </Popup>

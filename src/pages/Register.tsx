@@ -43,7 +43,7 @@ const Register = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData(prev => ({ ...prev, [name]: value || '' }))
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -332,7 +332,7 @@ const Register = () => {
               <FormLabel>LinkedIn</FormLabel>
               <Input
                 name="linkedin"
-                value={formData.linkedin}
+                value={formData.linkedin || ''}
                 onChange={handleChange}
                 placeholder="URL de tu perfil de LinkedIn"
               />
@@ -342,7 +342,7 @@ const Register = () => {
               <FormLabel>Biografía</FormLabel>
               <Textarea
                 name="biografia"
-                value={formData.biografia}
+                value={formData.biografia || ''}
                 onChange={handleChange}
                 placeholder="Cuéntanos sobre ti..."
               />

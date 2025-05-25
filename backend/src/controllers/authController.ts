@@ -4,27 +4,30 @@ import { Graduado } from '../models/Graduado'
 import { AdministradorModel } from '../models/Administrador'
 import { TokenModel } from '../models/Token'
 import bcrypt from 'bcrypt'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+import { env } from '../config/env'
 
 export const authController = {
   // Login de graduado
   async loginGraduado(req: Request, res: Response) {
     try {
       const { email, password } = req.body
+      console.log('Intentando login de graduado con email:', email)
 
       const graduado = await Graduado.findOne({ where: { email } })
       if (!graduado) {
+        console.log('Graduado no encontrado')
         return res.status(401).json({ error: 'Credenciales inválidas' })
       }
 
       // Verificar contraseña
       const isValidPassword = await bcrypt.compare(password, graduado.password)
       if (!isValidPassword) {
+        console.log('Contraseña inválida')
         return res.status(401).json({ error: 'Credenciales inválidas' })
       }
 
-      const token = jwt.sign({ id: graduado.id }, JWT_SECRET, { expiresIn: '24h' })
+      const token = jwt.sign({ id: graduado.id }, env.jwtSecret, { expiresIn: '24h' })
+      console.log('Token generado exitosamente para graduado')
 
       // Guardar el token en la base de datos
       await TokenModel.create({
@@ -50,7 +53,7 @@ export const authController = {
         }
       })
     } catch (error) {
-      console.error('Error en login:', error)
+      console.error('Error en login de graduado:', error)
       res.status(500).json({ error: 'Error en el inicio de sesión' })
     }
   },
@@ -75,10 +78,16 @@ export const authController = {
         return res.status(401).json({ error: 'Credenciales inválidas' })
       }
 
-      const token = jwt.sign({ id: admin.id, isAdmin: true }, JWT_SECRET, { expiresIn: '24h' })
-      console.log('Token generado exitosamente')
+      const token = jwt.sign({ id: admin.id, isAdmin: true }, env.jwtSecret, { expiresIn: '24h' })
+      console.log('Token generado exitosamente para admin')
 
-      res.json({ token, admin: { id: admin.id, email: admin.email } })
+      res.json({ 
+        token, 
+        admin: { 
+          id: admin.id, 
+          email: admin.email 
+        } 
+      })
     } catch (error) {
       console.error('Error en login de admin:', error)
       res.status(500).json({ error: 'Error en el inicio de sesión' })
@@ -94,6 +103,7 @@ export const authController = {
       }
       res.json({ message: 'Sesión cerrada correctamente' })
     } catch (error) {
+      console.error('Error en logout:', error)
       res.status(500).json({ error: 'Error al cerrar sesión' })
     }
   },
@@ -113,6 +123,7 @@ export const authController = {
 
       res.json({ valid: true })
     } catch (error) {
+      console.error('Error al verificar token:', error)
       res.status(500).json({ error: 'Error al verificar el token' })
     }
   }
