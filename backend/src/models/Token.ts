@@ -1,4 +1,4 @@
-import { Model, DataTypes } from 'sequelize'
+import { Model, DataTypes, Op } from 'sequelize'
 import { sequelize } from '../config/database'
 import { Graduado } from './Graduado'
 
@@ -70,7 +70,7 @@ Graduado.hasMany(Token, { foreignKey: 'graduado_id' })
 
 export class TokenModel {
   // Crear un nuevo token
-  static async create(token: Omit<TokenAttributes, 'id' | 'created_at'>): Promise<TokenAttributes> {
+  static async create(token: Omit<TokenAttributes, 'id' | 'created_at' | 'updated_at'>): Promise<TokenAttributes> {
     const result = await Token.create(token)
     return result.toJSON()
   }
@@ -83,7 +83,7 @@ export class TokenModel {
 
   // Verificar si un token es válido
   static async isValid(token: string): Promise<boolean> {
-    const result = await Token.findOne({ where: { token, expires_at: { [DataTypes.Op.gt]: new Date() } } })
+    const result = await Token.findOne({ where: { token, expires_at: { [Op.gt]: new Date() } } })
     return result !== null
   }
 
@@ -95,7 +95,7 @@ export class TokenModel {
 
   // Eliminar tokens expirados
   static async deleteExpired(): Promise<number> {
-    const result = await Token.destroy({ where: { expires_at: { [DataTypes.Op.lte]: new Date() } } })
+    const result = await Token.destroy({ where: { expires_at: { [Op.lte]: new Date() } } })
     return result
   }
 } 

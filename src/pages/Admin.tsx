@@ -16,7 +16,8 @@ import {
   Container,
   HStack,
   useToast,
-  Link as ChakraLink
+  Link as ChakraLink,
+  Select
 } from '@chakra-ui/react';
 import { FiUsers, FiMap, FiSearch, FiSettings } from 'react-icons/fi';
 import Graduados from './admin/Graduados';
@@ -32,6 +33,7 @@ const Dashboard = () => {
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const toast = useToast();
 
+  const [graduados, setGraduados] = useState([]);
   const [stats, setStats] = useState({
     totalGraduados: 0,
     graduadosAprobados: 0,
@@ -41,6 +43,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadStats();
+    loadGraduados();
   }, []);
 
   const loadStats = async () => {
@@ -51,6 +54,21 @@ const Dashboard = () => {
       toast({
         title: 'Error',
         description: 'No se pudieron cargar las estadísticas',
+        status: 'error',
+        duration: 3000,
+        isClosable: true
+      });
+    }
+  };
+
+  const loadGraduados = async () => {
+    try {
+      const data = await adminService.getGraduados();
+      setGraduados(data);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudieron cargar los graduados',
         status: 'error',
         duration: 3000,
         isClosable: true
@@ -253,44 +271,6 @@ const Dashboard = () => {
                   <Text>Restablecer Contraseña</Text>
                   <Text fontSize="sm" color="gray.500">
                     Cambiar contraseña de usuario
-                  </Text>
-                </VStack>
-              </Button>
-
-              <Button
-                onClick={async () => {
-                  const id = prompt('Ingrese el ID del graduado a eliminar:');
-                  if (id && window.confirm('¿Estás seguro de que deseas eliminar este perfil? Esta acción no se puede deshacer.')) {
-                    try {
-                      await adminService.deleteGraduado(Number(id));
-                      toast({
-                        title: 'Perfil eliminado',
-                        description: 'El perfil ha sido eliminado exitosamente',
-                        status: 'success',
-                        duration: 3000,
-                        isClosable: true,
-                      });
-                      // Recargar estadísticas
-                      loadStats();
-                    } catch (error) {
-                      toast({
-                        title: 'Error',
-                        description: 'No se pudo eliminar el perfil',
-                        status: 'error',
-                        duration: 3000,
-                        isClosable: true,
-                      });
-                    }
-                  }
-                }}
-                colorScheme="red"
-                size="lg"
-                height="100px"
-              >
-                <VStack>
-                  <Text>Eliminar Perfil</Text>
-                  <Text fontSize="sm" color="gray.500">
-                    Eliminar perfil de graduado
                   </Text>
                 </VStack>
               </Button>

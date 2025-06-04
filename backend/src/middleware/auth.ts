@@ -27,6 +27,11 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       const decoded = jwt.verify(token, env.jwtSecret) as JwtPayload
       req.user = decoded
 
+      // Si es una petición DELETE a /api/graduados/profile, permitir la eliminación
+      if (req.method === 'DELETE' && req.path === '/api/graduados/profile') {
+        return next();
+      }
+
       // Si es una petición PUT a /api/graduados/:id, verificar que el usuario está actualizando su propio perfil
       if (req.method === 'PUT' && req.path.startsWith('/api/graduados/')) {
         const graduadoId = parseInt(req.path.split('/').pop() || '')

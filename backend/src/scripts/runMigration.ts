@@ -1,5 +1,5 @@
 import { sequelize } from '../config/database'
-import { up } from '../migrations/add_coordinates'
+import { up } from '../migrations/20240320_add_new_fields'
 
 async function runMigration() {
   try {

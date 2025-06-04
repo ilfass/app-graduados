@@ -12,8 +12,13 @@ export class Graduado extends Model {
   declare ciudad: string
   declare pais: string
   declare institucion?: string
+  declare lugar_trabajo?: string
+  declare area_desempeno?: 'Ciencias Agrarias, de Ingeniería y de Materiales' | 'Ciencias Biológicas y de la Salud' | 'Ciencias Exactas y Naturales' | 'Ciencias Sociales y Humanidades'
+  declare sector_trabajo?: 'Sector privado - Relación de dependencia' | 'Sector privado - Trabajo Independiente' | 'Sector privado - Cooperativa' | 'Sector público - Internacional' | 'Sector público - Nacional' | 'Sector público - Provincial' | 'Sector público - Local' | 'Organismos No Gubernamentales/Asociaciones Civiles - Internacional' | 'Organismos No Gubernamentales/Asociaciones Civiles - Nacional' | 'Organismos No Gubernamentales/Asociaciones Civiles - Local'
+  declare vinculado_unicen?: boolean
+  declare areas_vinculacion?: string
+  declare interes_proyectos?: boolean
   declare linkedin?: string
-  declare biografia?: string
   declare foto?: string
   declare estado: 'pendiente' | 'aprobado' | 'rechazado'
   declare observaciones_admin?: string
@@ -21,6 +26,7 @@ export class Graduado extends Model {
   declare longitud?: number
   declare created_at: Date
   declare updated_at: Date
+  declare biografia?: string
 }
 
 Graduado.init(
@@ -70,12 +76,48 @@ Graduado.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    linkedin: {
+    lugar_trabajo: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    biografia: {
-      type: DataTypes.TEXT,
+    area_desempeno: {
+      type: DataTypes.ENUM(
+        'Ciencias Agrarias, de Ingeniería y de Materiales',
+        'Ciencias Biológicas y de la Salud',
+        'Ciencias Exactas y Naturales',
+        'Ciencias Sociales y Humanidades'
+      ),
+      allowNull: true,
+    },
+    sector_trabajo: {
+      type: DataTypes.ENUM(
+        'Sector privado - Relación de dependencia',
+        'Sector privado - Trabajo Independiente',
+        'Sector privado - Cooperativa',
+        'Sector público - Internacional',
+        'Sector público - Nacional',
+        'Sector público - Provincial',
+        'Sector público - Local',
+        'Organismos No Gubernamentales/Asociaciones Civiles - Internacional',
+        'Organismos No Gubernamentales/Asociaciones Civiles - Nacional',
+        'Organismos No Gubernamentales/Asociaciones Civiles - Local'
+      ),
+      allowNull: true,
+    },
+    vinculado_unicen: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    areas_vinculacion: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    interes_proyectos: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    linkedin: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
     foto: {
@@ -107,7 +149,11 @@ Graduado.init(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW
-    }
+    },
+    biografia: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,

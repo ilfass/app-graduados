@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { AdministradorModel } from '../models/Administrador'
 import { Graduado } from '../models/Graduado'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 export const adminController = {
   // Crear un nuevo administrador
@@ -75,22 +77,59 @@ export const adminController = {
   },
 
   // Endpoint para estadísticas del dashboard
-  async dashboardStats(req, res) {
+  async dashboardStats(req: Request, res: Response) {
     try {
       // Total graduados
       const totalGraduados = await Graduado.count();
-      // Total países distintos
-      const totalPaises = await Graduado.count({ distinct: true, col: 'pais' });
-      // Total carreras distintas
-      const totalCarreras = await Graduado.count({ distinct: true, col: 'carrera' });
+      
+      // Graduados por estado
+      const graduadosAprobados = await Graduado.count({
+        where: { estado: 'aprobado' }
+      });
+      
+      const graduadosPendientes = await Graduado.count({
+        where: { estado: 'pendiente' }
+      });
+      
+      const graduadosRechazados = await Graduado.count({
+        where: { estado: 'rechazado' }
+      });
 
       res.json({
         totalGraduados,
-        totalPaises,
-        totalCarreras
+        graduadosAprobados,
+        graduadosPendientes,
+        graduadosRechazados
       });
     } catch (error) {
       res.status(500).json({ error: 'Error al obtener estadísticas del dashboard' });
+    }
+  },
+
+  login: async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body
+
+      const admin = await AdministradorModel.findByEmail(email)
+      if (!admin) {
+        return res.status(401).json({ message: 'Credenciales inválidas' })
+      }
+
+      const isValidPassword = await bcrypt.compare(password, admin.password)
+      if (!isValidPassword) {
+        return res.status(401).json({ message: 'Credenciales inválidas' })
+      }
+
+      const token = jwt.sign(
+        { id: admin.id, email: admin.email },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
+      )
+
+      res.json({ token })
+    } catch (error) {
+      console.error('Error en login:', error)
+      res.status(500).json({ message: 'Error interno del servidor' })
     }
   }
 } 

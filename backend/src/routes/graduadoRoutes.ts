@@ -16,6 +16,7 @@ router.use(auth)
 router.get('/profile', graduadoController.getProfile)
 router.put('/:id', graduadoController.update)
 router.post('/:id/foto', graduadoController.uploadPhoto)
+router.delete('/profile', graduadoController.deleteProfile)
 
 // Rutas de administrador
 router.get('/', adminAuth, graduadoController.getAll)
@@ -26,8 +27,5 @@ router.delete('/:id', adminAuth, graduadoController.delete)
 
 // Nueva ruta para actualizar estado y calcular coordenadas
 router.put('/:id/status', graduadoController.updateStatus)
-
-// Eliminar perfil del graduado
-router.delete('/profile', graduadoController.deleteProfile)
 
 export default router 

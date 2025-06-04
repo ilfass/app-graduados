@@ -26,7 +26,7 @@ export const authController = {
         return res.status(401).json({ error: 'Credenciales inválidas' })
       }
 
-      const token = jwt.sign({ id: graduado.id }, env.jwtSecret, { expiresIn: '24h' })
+      const token = jwt.sign({ id: graduado.id, isAdmin: false }, env.jwtSecret, { expiresIn: '24h' })
       console.log('Token generado exitosamente para graduado')
 
       // Guardar el token en la base de datos

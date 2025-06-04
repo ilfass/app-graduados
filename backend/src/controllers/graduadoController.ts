@@ -9,6 +9,7 @@ import path from 'path'
 import fs from 'fs'
 import axios from 'axios'
 import { Op } from 'sequelize'
+import { Token } from '../models/Token'
 
 // Configuración de multer para el almacenamiento de archivos
 const storage = multer.diskStorage({
@@ -778,24 +779,45 @@ export const graduadoController = {
     }
   },
 
-  async deleteProfile(req: Request, res: Response) {
+  deleteProfile: async (req: Request, res: Response) => {
     try {
+      console.log('Iniciando eliminación de perfil...');
       const graduadoId = req.user?.id;
+      console.log('ID del graduado a eliminar:', graduadoId);
       
       if (!graduadoId) {
+        console.log('Error: No se encontró ID de usuario en el token');
         return res.status(401).json({ error: 'No autorizado' });
       }
 
       const graduado = await Graduado.findByPk(graduadoId);
+      console.log('Graduado encontrado:', graduado ? 'Sí' : 'No');
       
       if (!graduado) {
-        return res.status(404).json({ error: 'Graduado no encontrado' });
+        console.log('Error: Graduado no encontrado');
+        return res.status(404).json({ error: 'Perfil no encontrado' });
       }
 
-      await graduado.destroy();
-      res.json({ message: 'Perfil eliminado exitosamente' });
+      try {
+        console.log('Eliminando tokens asociados...');
+        await Token.destroy({ where: { graduado_id: graduadoId } });
+        console.log('Tokens eliminados exitosamente');
+
+        console.log('Intentando eliminar el perfil...');
+        await graduado.destroy();
+        console.log('Perfil eliminado exitosamente');
+        res.json({ message: 'Perfil eliminado exitosamente' });
+      } catch (destroyError: any) {
+        console.error('Error al eliminar el perfil:', destroyError);
+        if (destroyError.name === 'SequelizeForeignKeyConstraintError') {
+          return res.status(400).json({ 
+            error: 'No se puede eliminar el perfil porque tiene registros asociados. Por favor, contacte al administrador.' 
+          });
+        }
+        throw destroyError;
+      }
     } catch (error) {
-      console.error('Error al eliminar el perfil:', error);
+      console.error('Error al eliminar perfil:', error);
       res.status(500).json({ error: 'Error al eliminar el perfil' });
     }
   }

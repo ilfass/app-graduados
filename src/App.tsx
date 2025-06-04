@@ -5,6 +5,7 @@ import Navbar from './components/Navbar'
 import NavigationButtons from './components/NavigationButtons'
 import { Home } from './pages/Home'
 import Register from './pages/Register'
+import RegisterSuccess from './pages/RegisterSuccess'
 import Admin from './pages/Admin'
 import Profile from './pages/Profile'
 import { GraduadosMap } from './components/GraduadosMap'
@@ -27,6 +28,7 @@ const App = () => {
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/register-success" element={<RegisterSuccess />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/" element={<Home />} />
                 

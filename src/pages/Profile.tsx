@@ -42,6 +42,7 @@ interface PerfilGraduado {
   foto?: string;
   latitud?: number;
   longitud?: number;
+  estado: 'pendiente' | 'aprobado' | 'rechazado';
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -80,6 +81,17 @@ const styles = {
     borderRadius: '0.375rem',
     border: 'none',
     cursor: 'pointer',
+  },
+  deleteButton: {
+    backgroundColor: 'rgba(239, 68, 68, 0.8)', // red-500 con 80% de opacidad
+    color: 'white',
+    padding: '0.5rem 1rem',
+    borderRadius: '0.375rem',
+    border: 'none',
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: 'rgba(220, 38, 38, 0.8)', // red-600 con 80% de opacidad
+    },
   },
   form: {
     padding: '1.5rem',
@@ -327,6 +339,34 @@ const styles = {
     gap: '0.5rem',
     marginTop: '1rem',
   },
+  estadoBadge: {
+    padding: '0.25rem 0.75rem',
+    borderRadius: '9999px',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    marginTop: '0.5rem',
+    display: 'inline-block'
+  },
+  estadoPendiente: {
+    backgroundColor: '#FEF3C7',
+    color: '#92400E'
+  },
+  estadoAprobado: {
+    backgroundColor: '#D1FAE5',
+    color: '#065F46'
+  },
+  estadoRechazado: {
+    backgroundColor: '#FEE2E2',
+    color: '#991B1B'
+  },
+  mensajeEstado: {
+    marginTop: '1rem',
+    padding: '1rem',
+    borderRadius: '0.5rem',
+    backgroundColor: '#FEF3C7',
+    color: '#92400E',
+    fontSize: '0.875rem'
+  }
 };
 
 // Componente para manejar eventos del mapa
@@ -716,21 +756,6 @@ const Profile = () => {
               </div>
               <div className="flex justify-end space-x-4 mt-6">
                 <button
-                  type="button"
-                  onClick={() => {
-                    if (window.confirm('¿Estás seguro que deseas eliminar tu perfil? Esta acción no se puede deshacer.')) {
-                      handleDeleteProfile();
-                    }
-                  }}
-                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-                  style={{
-                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                    marginRight: '1rem'
-                  }}
-                >
-                  Eliminar Perfil
-                </button>
-                <button
                   type="submit"
                   disabled={loading}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
@@ -766,6 +791,21 @@ const Profile = () => {
                   <h2 style={styles.name}>{`${formData?.nombre} ${formData?.apellido}`}</h2>
                   <p style={styles.career}>{formData?.carrera}</p>
                   <p style={styles.graduation}>Graduado en {formData?.anio_graduacion}</p>
+                  <div style={{
+                    ...styles.estadoBadge,
+                    ...(formData?.estado === 'aprobado' ? styles.estadoAprobado :
+                         formData?.estado === 'rechazado' ? styles.estadoRechazado :
+                         styles.estadoPendiente)
+                  }}>
+                    {formData?.estado === 'aprobado' ? 'Aprobado' :
+                     formData?.estado === 'rechazado' ? 'Rechazado' :
+                     'Pendiente de Aprobación'}
+                  </div>
+                  {formData?.estado === 'pendiente' && (
+                    <div style={styles.mensajeEstado}>
+                      Tu perfil está pendiente de aprobación. Una vez aprobado, aparecerás en el mapa de graduados.
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -873,6 +913,20 @@ const Profile = () => {
           {error}
         </div>
       )}
+
+      <div className="relative">
+        <button
+          onClick={() => {
+            if (window.confirm('¿Estás seguro de que deseas eliminar tu perfil? Esta acción no se puede deshacer.')) {
+              handleDeleteProfile();
+            }
+          }}
+          disabled={loading}
+          style={styles.deleteButton}
+        >
+          {loading ? 'Eliminando...' : 'Eliminar Perfil'}
+        </button>
+      </div>
     </div>
   );
 };

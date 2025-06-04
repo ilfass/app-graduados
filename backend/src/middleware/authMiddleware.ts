@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { env } from '../config/env';
+import jwt from 'jsonwebtoken';
+import { JwtPayload } from '../types/auth';
 
 declare global {
   namespace Express {
@@ -10,19 +10,19 @@ declare global {
   }
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     
     if (!token) {
-      return res.status(401).json({ error: 'No se proporcionó token de autenticación' });
+      return res.status(401).json({ message: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, env.jwtSecret) as JwtPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as JwtPayload;
     req.user = decoded;
     
     next();
   } catch (error) {
-    return res.status(401).json({ error: 'Token inválido o expirado' });
+    return res.status(401).json({ message: 'Invalid token' });
   }
 }; 

@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         localStorage.removeItem('token')
         localStorage.removeItem('userType')
         localStorage.removeItem('lastLogin')
-        if (window.location.pathname !== '/') {
+        if (window.location.pathname !== '/' && window.location.pathname !== '/register') {
           navigate('/login')
         }
       }

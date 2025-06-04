@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Box,
   Container,
@@ -17,6 +17,27 @@ import {
 import { InfoIcon } from '@chakra-ui/icons'
 import { graduadoService } from '../services/api'
 import { useNavigate } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
+
+// Fix para los íconos de Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Componente para manejar eventos del mapa
+const MapEvents = ({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) => {
+  useMapEvents({
+    click: (e) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+};
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -29,14 +50,26 @@ const Register = () => {
     ciudad: '',
     pais: '',
     institucion: '',
-    linkedin: '',
+    lugar_trabajo: '',
+    area_desempeno: '',
+    sector_trabajo: '',
+    tipo_empleo: '',
+    nivel_empleo: '',
     biografia: '',
+    vinculado_unicen: false,
+    areas_vinculacion: '',
+    interes_proyectos: false,
+    linkedin: '',
     password: '',
     confirmPassword: '',
+    latitud: undefined as number | undefined,
+    longitud: undefined as number | undefined,
   })
 
   const [documentoIdentidad, setDocumentoIdentidad] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showMap, setShowMap] = useState(false)
   const toast = useToast()
   const navigate = useNavigate()
   const [error, setError] = useState('')
@@ -52,6 +85,44 @@ const Register = () => {
       setDocumentoIdentidad(file)
     }
   }
+
+  const handleLocationSearch = async () => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        setFormData(prev => ({
+          ...prev,
+          ciudad: display_name.split(',')[0]?.trim() || '',
+          pais: display_name.split(',').slice(-1)[0]?.trim() || '',
+          latitud: parseFloat(lat),
+          longitud: parseFloat(lon)
+        }));
+        setShowMap(true);
+      }
+    } catch (error) {
+      console.error('Error al buscar ubicación:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo encontrar la ubicación',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setFormData(prev => ({
+      ...prev,
+      latitud: lat,
+      longitud: lng
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,6 +144,13 @@ const Register = () => {
         return
       }
 
+      // Validar que se haya seleccionado una ubicación
+      if (!formData.latitud || !formData.longitud) {
+        setError('Debes seleccionar una ubicación en el mapa')
+        setLoading(false)
+        return
+      }
+
       // Crear objeto con los datos del formulario
       const graduadoData = {
         ...formData,
@@ -81,26 +159,30 @@ const Register = () => {
       }
 
       // Eliminar campos que no necesitamos enviar
-      delete graduadoData.confirmPassword
-      delete graduadoData.carrera_otra
+      const { confirmPassword, carrera_otra, ...dataToSend } = graduadoData;
 
       // Debug: mostrar los datos que se enviarán
-      console.log('Datos a enviar:', graduadoData)
+      console.log('Datos a enviar:', dataToSend)
 
-      await graduadoService.register(graduadoData)
+      await graduadoService.register(dataToSend)
       
       // Hacer login automático después del registro
-      const loginResponse = await graduadoService.login(graduadoData.email, graduadoData.password)
+      const loginResponse = await graduadoService.login(dataToSend.email, dataToSend.password)
       localStorage.setItem('token', loginResponse.token)
       
-      toast({
-        title: 'Registro exitoso',
-        description: 'Tu cuenta ha sido creada correctamente',
-        status: 'success',
-        duration: 5000,
-        isClosable: true,
+      // Redirigir a la página de éxito con los datos del usuario
+      navigate('/register-success', {
+        state: {
+          userData: {
+            nombre: formData.nombre,
+            apellido: formData.apellido,
+            email: formData.email,
+            carrera: formData.carrera === 'Otra' ? formData.carrera_otra : formData.carrera,
+            ciudad: formData.ciudad,
+            pais: formData.pais
+          }
+        }
       })
-      navigate('/profile')
     } catch (error) {
       console.error('Error al registrar:', error)
       setError('Error al registrar. Por favor, intenta nuevamente.')
@@ -118,7 +200,7 @@ const Register = () => {
           </Heading>
           <Alert status="info" mb={4}>
             <InfoIcon mr={2} />
-            Para validar tu identidad como graduado, necesitamos que subas tu documento de identidad
+            Para validar tu identidad como graduado, puedes subir tu documento de identidad
           </Alert>
         </Box>
 
@@ -299,52 +381,159 @@ const Register = () => {
             </FormControl>
 
             <FormControl isRequired>
-              <FormLabel>Ciudad</FormLabel>
-              <Input
-                name="ciudad"
-                value={formData.ciudad}
-                onChange={handleChange}
-                placeholder="Tu ciudad actual"
-              />
+              <FormLabel>Ubicación</FormLabel>
+              <VStack spacing={2} align="stretch">
+                <Box display="flex" gap={2}>
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar ubicación..."
+                  />
+                  <Button onClick={handleLocationSearch}>
+                    Buscar
+                  </Button>
+                </Box>
+                {formData.latitud && formData.longitud ? (
+                  <Box height="300px" width="100%" borderRadius="md" overflow="hidden">
+                    <MapContainer
+                      center={[formData.latitud, formData.longitud]}
+                      zoom={13}
+                      style={{ height: '100%', width: '100%' }}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      <Marker position={[formData.latitud, formData.longitud]} />
+                      <MapEvents onMapClick={handleMapClick} />
+                    </MapContainer>
+                  </Box>
+                ) : (
+                  <Alert status="warning">
+                    <Text>Debes seleccionar una ubicación en el mapa</Text>
+                  </Alert>
+                )}
+              </VStack>
             </FormControl>
 
-            <FormControl isRequired>
-              <FormLabel>País</FormLabel>
-              <Input
-                name="pais"
-                value={formData.pais}
-                onChange={handleChange}
-                placeholder="Tu país actual"
-              />
-            </FormControl>
-
-            <FormControl isRequired>
-              <FormLabel>Nombre de la institución donde te encuentras</FormLabel>
+            <FormControl>
+              <FormLabel>Institución</FormLabel>
               <Input
                 name="institucion"
                 value={formData.institucion}
                 onChange={handleChange}
-                placeholder="Ingresa el nombre de la institución donde te encuentras actualmente"
+                placeholder="Institución donde te graduaste"
               />
             </FormControl>
+
+            <FormControl>
+              <FormLabel>¿Dónde trabajás actualmente?</FormLabel>
+              <Input
+                name="lugar_trabajo"
+                value={formData.lugar_trabajo}
+                onChange={handleChange}
+                placeholder="Lugar de trabajo actual"
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Área principal de desempeño laboral/profesional</FormLabel>
+              <Select
+                name="area_desempeno"
+                value={formData.area_desempeno}
+                onChange={handleChange}
+                placeholder="Seleccione el área de conocimiento"
+              >
+                <option value="Ciencias Agrarias, de Ingeniería y de Materiales">Ciencias Agrarias, de Ingeniería y de Materiales</option>
+                <option value="Ciencias Biológicas y de la Salud">Ciencias Biológicas y de la Salud</option>
+                <option value="Ciencias Exactas y Naturales">Ciencias Exactas y Naturales</option>
+                <option value="Ciencias Sociales y Humanidades">Ciencias Sociales y Humanidades</option>
+              </Select>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Sector donde se encuentra trabajando</FormLabel>
+              <Select
+                name="sector_trabajo"
+                value={formData.sector_trabajo}
+                onChange={handleChange}
+                placeholder="Seleccione el sector"
+              >
+                <optgroup label="Sector privado">
+                  <option value="Sector privado - Relación de dependencia">Relación de dependencia</option>
+                  <option value="Sector privado - Trabajo Independiente">Trabajo Independiente (autogestionado)</option>
+                  <option value="Sector privado - Cooperativa">Cooperativa</option>
+                </optgroup>
+                <optgroup label="Sector público">
+                  <option value="Sector público - Internacional">Internacional</option>
+                  <option value="Sector público - Nacional">Nacional</option>
+                  <option value="Sector público - Provincial">Provincial</option>
+                  <option value="Sector público - Local">Local</option>
+                </optgroup>
+                <optgroup label="Organismos No Gubernamentales/Asociaciones Civiles">
+                  <option value="Organismos No Gubernamentales/Asociaciones Civiles - Internacional">Internacional</option>
+                  <option value="Organismos No Gubernamentales/Asociaciones Civiles - Nacional">Nacional</option>
+                  <option value="Organismos No Gubernamentales/Asociaciones Civiles - Local">Local</option>
+                </optgroup>
+              </Select>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>Breve recorrido de tu vida profesional/laboral (BIOGRAFÍA)</FormLabel>
+              <Textarea
+                name="biografia"
+                value={formData.biografia}
+                onChange={handleChange}
+                placeholder="Máximo 400 palabras"
+                maxLength={400}
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>¿Seguís vinculado con la UNICEN?</FormLabel>
+              <Select
+                name="vinculado_unicen"
+                value={formData.vinculado_unicen ? 'true' : 'false'}
+                onChange={(e) => setFormData(prev => ({ ...prev, vinculado_unicen: e.target.value === 'true' }))}
+              >
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </Select>
+            </FormControl>
+
+            {formData.vinculado_unicen && (
+              <FormControl>
+                <FormLabel>¿Con qué áreas?</FormLabel>
+                <Input
+                  name="areas_vinculacion"
+                  value={formData.areas_vinculacion}
+                  onChange={handleChange}
+                  placeholder="Especifique las áreas"
+                />
+              </FormControl>
+            )}
+
+            {!formData.vinculado_unicen && (
+              <FormControl>
+                <FormLabel>¿Te gustaría que te convoquemos para trabajar en proyectos institucionales?</FormLabel>
+                <Select
+                  name="interes_proyectos"
+                  value={formData.interes_proyectos ? 'true' : 'false'}
+                  onChange={(e) => setFormData(prev => ({ ...prev, interes_proyectos: e.target.value === 'true' }))}
+                >
+                  <option value="true">Sí</option>
+                  <option value="false">No</option>
+                </Select>
+              </FormControl>
+            )}
 
             <FormControl>
               <FormLabel>LinkedIn</FormLabel>
               <Input
                 name="linkedin"
-                value={formData.linkedin || ''}
+                value={formData.linkedin}
                 onChange={handleChange}
                 placeholder="URL de tu perfil de LinkedIn"
-              />
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>Biografía</FormLabel>
-              <Textarea
-                name="biografia"
-                value={formData.biografia || ''}
-                onChange={handleChange}
-                placeholder="Cuéntanos sobre ti..."
               />
             </FormControl>
 
@@ -356,18 +545,24 @@ const Register = () => {
                 onChange={handleFileChange}
               />
               <Text fontSize="sm" color="gray.500" mt={1}>
-                Formatos aceptados: PDF, JPG, PNG
+                Opcional: Sube una copia de tu documento de identidad para validar tu identidad
               </Text>
             </FormControl>
+
+            {error && (
+              <Alert status="error">
+                <Text>{error}</Text>
+              </Alert>
+            )}
 
             <Button
               type="submit"
               colorScheme="blue"
               size="lg"
-              width="100%"
+              width="full"
               isLoading={loading}
             >
-              Enviar Registro
+              Registrarse
             </Button>
           </VStack>
         </Box>
