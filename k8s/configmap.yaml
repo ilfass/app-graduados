@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: graduados-config
-  namespace: web-internacionales-mapa
+  namespace: web-internacionales-appgraduados
 data:
   SMTP_HOST: "smtp.gmail.com"
   SMTP_PORT: "587"

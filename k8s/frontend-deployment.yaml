@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: graduados-frontend
-  namespace: web-internacionales-mapa
+  namespace: web-internacionales-appgraduados
 spec:
   replicas: 1
   selector:
@@ -13,9 +13,11 @@ spec:
       labels:
         app: graduados-frontend
     spec:
+      imagePullSecrets:
+      - name: harbor.unicen.edu.ar
       containers:
       - name: frontend
-        image: graduados-frontend:latest
+        image: harbor.unicen.edu.ar/web/graduados-frontend:1.1
         ports:
         - containerPort: 80
         env:

@@ -71,7 +71,7 @@ Graduado.hasMany(Token, { foreignKey: 'graduado_id' })
 export class TokenModel {
   // Crear un nuevo token
   static async create(token: Omit<TokenAttributes, 'id' | 'created_at' | 'updated_at'>): Promise<TokenAttributes> {
-    const result = await Token.create(token)
+    const result = await Token.create(token as any)
     return result.toJSON()
   }
 

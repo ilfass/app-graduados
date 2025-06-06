@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: graduados-backend
-  namespace: web-internacionales-mapa
+  namespace: web-internacionales-appgraduados
 spec:
   replicas: 1
   selector:
@@ -13,18 +13,12 @@ spec:
       labels:
         app: graduados-backend
     spec:
-      initContainers:
-      - name: init-db
-        image: graduados-backend:latest
-        command: ['node', 'dist/scripts/createDefaultAdmin.js']
-        volumeMounts:
-        - name: database-storage
-          mountPath: /app/data
+      imagePullSecrets:
+      - name: harbor.unicen.edu.ar
       containers:
       - name: backend
-        image: graduados-backend:latest
-        ports:
-        - containerPort: 3000
+        image: harbor.unicen.edu.ar/web/graduados-backend:1.0
+        imagePullPolicy: Always    
         env:
         - name: DB_PATH
           valueFrom:

@@ -1,0 +1,18 @@
+FROM node:18
+
+WORKDIR /app
+
+COPY ../backend/package*.json ./
+
+RUN npm install
+
+COPY ../backend/ ./
+
+RUN npm run build
+
+# Crear directorio para la base de datos y establecer permisos
+RUN mkdir -p /app/database && chown -R node:node /app
+
+USER node
+
+CMD ["npm", "start"] 

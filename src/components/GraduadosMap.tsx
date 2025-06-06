@@ -63,7 +63,7 @@ export const GraduadosMap = () => {
     fetchGraduados()
 
     // Configurar Socket.IO
-    socketRef.current = io('http://localhost:3001')
+    socketRef.current = io('http://localhost:3000')
 
     // Escuchar actualizaciones de graduados
     socketRef.current.on('graduadoActualizado', (data: { id: number; latitud: number; longitud: number }) => {

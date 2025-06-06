@@ -2,7 +2,7 @@ import { Box, Button, Container, Heading, Text, VStack } from '@chakra-ui/react'
 import { GraduadosMap } from '../components/GraduadosMap'
 import { Link as RouterLink } from 'react-router-dom'
 
-export const Home = () => {
+const Home = () => {
   return (
     <Box>
       {/* Hero Section */}
@@ -98,4 +98,6 @@ export const Home = () => {
       </Box>
     </Box>
   )
-} 
+}
+
+export default Home 

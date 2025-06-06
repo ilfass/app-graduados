@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile.backend
+    container_name: graduados-backend
+    environment:
+      - PORT=3000
+      - DB_PATH=/app/data/database.sqlite
+      - JWT_SECRET=tu_jwt_secret
+      - SMTP_USER=tu_smtp_user
+      - SMTP_PASS=tu_smtp_pass
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_SECURE=false
+      - SMTP_FROM=relaciones.internacionales@rec.unicen.edu.ar
+      - FRONTEND_URL=http://localhost
+      - ADMIN_EMAIL=relaciones.internacionales@rec.unicen.edu.ar
+    volumes:
+      - ../backend/data:/app/data
+    ports:
+      - "3000:3000"
+    networks:
+      - graduados-network
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker-compose/Dockerfile.frontend
+    container_name: graduados-frontend
+    environment:
+      - VITE_API_URL=/api
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - graduados-network
+
+networks:
+  graduados-network:
+    driver: bridge 

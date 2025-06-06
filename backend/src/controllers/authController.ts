@@ -33,8 +33,7 @@ export const authController = {
       await TokenModel.create({
         graduado_id: graduado.id,
         token,
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        updated_at: new Date()
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000)
       })
 
       res.json({ 

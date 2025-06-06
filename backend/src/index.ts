@@ -41,17 +41,23 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   res.status(500).json({ error: 'Error interno del servidor' })
 })
 
-// Sincronizar base de datos
-sequelize.sync()
-  .then(() => {
+// Función para iniciar el servidor
+const startServer = async () => {
+  try {
+    // Sincronizar base de datos
+    await sequelize.sync()
     console.log('Base de datos sincronizada correctamente')
-  })
-  .catch((error) => {
-    console.error('Error al sincronizar la base de datos:', error)
-  })
 
-// Iniciar servidor
-const PORT = env.port || 3000
-httpServer.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`)
-}) 
+    // Iniciar servidor
+    const PORT = env.port || 3000
+    httpServer.listen(PORT, () => {
+      console.log(`Servidor corriendo en http://localhost:${PORT}`)
+    })
+  } catch (error) {
+    console.error('Error al iniciar el servidor:', error)
+    process.exit(1)
+  }
+}
+
+// Iniciar el servidor
+startServer() 

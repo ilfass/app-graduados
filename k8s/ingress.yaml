@@ -2,9 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: graduados-ingress
-  namespace: web-internacionales-mapa
+  namespace: web-internacionales-appgraduados
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    #nginx.ingress.kubernetes.io/rewrite-target: /$2
     cert-manager.io/cluster-issuer: "letsencrypt"
     nginx.ingress.kubernetes.io/proxy-body-size: 16224m
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "1200"
@@ -20,20 +20,20 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - internacionalesgraduados.nuevo.unicen.edu.ar
-    secretName: internacionalesgraduados.nuevo.unicen.edu.ar
+    - internacionalesgraduados.unicen.edu.ar
+    secretName: internacionalesgraduados.unicen.edu.ar
   rules:
-  - host: internacionalesgraduados.nuevo.unicen.edu.ar
+  - host: internacionalesgraduados.unicen.edu.ar
     http:
       paths:
-      - path: /graduados(/|$)(.*)
+      - path: /
         pathType: ImplementationSpecific
         backend:
           service:
             name: graduados-frontend
             port:
               number: 80
-      - path: /graduados/api(/|$)(.*)
+      - path: /api(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:

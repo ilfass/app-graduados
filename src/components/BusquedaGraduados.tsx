@@ -1,178 +1,148 @@
 import { useState } from 'react'
 import {
   Box,
+  Button,
+  FormControl,
+  FormLabel,
   Input,
   Select,
-  HStack,
-  Button,
-  VStack,
-  Text,
-  useToast
+  Stack,
+  useToast,
 } from '@chakra-ui/react'
-import { graduadoService } from '../services/api'
+import axios from 'axios'
 
-interface Filtros {
+interface Graduado {
+  id: number
   nombre: string
+  apellido: string
   carrera: string
   pais: string
-  anioDesde: string
-  anioHasta: string
+  ciudad: string
+  estado: string
+  anio_graduacion: number
 }
 
 interface BusquedaGraduadosProps {
-  onResultados: (graduados: any[]) => void
+  onResultados: (graduados: Graduado[]) => void
 }
 
 export const BusquedaGraduados = ({ onResultados }: BusquedaGraduadosProps) => {
-  const [filtros, setFiltros] = useState<Filtros>({
-    nombre: '',
-    carrera: '',
-    pais: '',
-    anioDesde: '',
-    anioHasta: ''
-  })
+  const [nombre, setNombre] = useState('')
+  const [carrera, setCarrera] = useState('')
+  const [pais, setPais] = useState('')
+  const [anioDesde, setAnioDesde] = useState('')
+  const [anioHasta, setAnioHasta] = useState('')
   const [loading, setLoading] = useState(false)
   const toast = useToast()
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFiltros(prev => ({ ...prev, [name]: value }))
-  }
-
   const handleBuscar = async () => {
-    setLoading(true)
     try {
-      const response = await graduadoService.getAll()
+      setLoading(true)
+      const response = await axios.get('http://localhost:3001/api/graduados')
       let graduados = response.data
 
       // Aplicar filtros
-      if (filtros.nombre) {
-        graduados = graduados.filter(g => 
-          `${g.nombre} ${g.apellido}`.toLowerCase().includes(filtros.nombre.toLowerCase())
+      if (nombre) {
+        graduados = graduados.filter((g: Graduado) =>
+          `${g.nombre} ${g.apellido}`.toLowerCase().includes(nombre.toLowerCase())
         )
       }
-      if (filtros.carrera) {
-        graduados = graduados.filter(g => g.carrera === filtros.carrera)
+      if (carrera) {
+        graduados = graduados.filter((g: Graduado) =>
+          g.carrera.toLowerCase().includes(carrera.toLowerCase())
+        )
       }
-      if (filtros.pais) {
-        graduados = graduados.filter(g => g.pais === filtros.pais)
+      if (pais) {
+        graduados = graduados.filter((g: Graduado) =>
+          g.pais.toLowerCase().includes(pais.toLowerCase())
+        )
       }
-      if (filtros.anioDesde) {
-        graduados = graduados.filter(g => g.anio_graduacion >= parseInt(filtros.anioDesde))
+      if (anioDesde) {
+        graduados = graduados.filter(
+          (g: Graduado) => g.anio_graduacion >= parseInt(anioDesde)
+        )
       }
-      if (filtros.anioHasta) {
-        graduados = graduados.filter(g => g.anio_graduacion <= parseInt(filtros.anioHasta))
+      if (anioHasta) {
+        graduados = graduados.filter(
+          (g: Graduado) => g.anio_graduacion <= parseInt(anioHasta)
+        )
       }
 
       onResultados(graduados)
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Error al buscar graduados',
+        description: 'No se pudieron cargar los graduados',
         status: 'error',
         duration: 5000,
-        isClosable: true
+        isClosable: true,
       })
     } finally {
       setLoading(false)
     }
   }
 
-  const handleLimpiar = () => {
-    setFiltros({
-      nombre: '',
-      carrera: '',
-      pais: '',
-      anioDesde: '',
-      anioHasta: ''
-    })
-    handleBuscar()
-  }
-
   return (
-    <Box p={4} borderWidth="1px" borderRadius="lg" boxShadow="md">
-      <VStack spacing={4}>
-        <Text fontSize="xl" fontWeight="bold">
-          Buscar Graduados
-        </Text>
-
-        <Input
-          name="nombre"
-          value={filtros.nombre}
-          onChange={handleChange}
-          placeholder="Buscar por nombre o apellido"
-        />
-
-        <HStack spacing={4} w="100%">
-          <Select
-            name="carrera"
-            value={filtros.carrera}
-            onChange={handleChange}
-            placeholder="Carrera"
-          >
-            <option value="Ingeniería en Sistemas">Ingeniería en Sistemas</option>
-            <option value="Ingeniería Química">Ingeniería Química</option>
-            <option value="Ingeniería Civil">Ingeniería Civil</option>
-            <option value="Ingeniería Industrial">Ingeniería Industrial</option>
-            <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
-            <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
-            <option value="Ingeniería Electrónica">Ingeniería Electrónica</option>
-            <option value="Ingeniería en Alimentos">Ingeniería en Alimentos</option>
-            <option value="Ingeniería Agronómica">Ingeniería Agronómica</option>
-            <option value="Ingeniería en Petróleo">Ingeniería en Petróleo</option>
-          </Select>
-
-          <Select
-            name="pais"
-            value={filtros.pais}
-            onChange={handleChange}
-            placeholder="País"
-          >
-            <option value="Argentina">Argentina</option>
-            <option value="Brasil">Brasil</option>
-            <option value="Chile">Chile</option>
-            <option value="Colombia">Colombia</option>
-            <option value="México">México</option>
-            <option value="Perú">Perú</option>
-            <option value="Uruguay">Uruguay</option>
-            <option value="Venezuela">Venezuela</option>
-          </Select>
-        </HStack>
-
-        <HStack spacing={4} w="100%">
+    <Box p={5} shadow="md" borderWidth="1px" borderRadius="md" width="100%">
+      <Stack spacing={4}>
+        <FormControl>
+          <FormLabel>Nombre</FormLabel>
           <Input
-            name="anioDesde"
-            type="number"
-            value={filtros.anioDesde}
-            onChange={handleChange}
-            placeholder="Año desde"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Buscar por nombre o apellido"
           />
-          <Input
-            name="anioHasta"
-            type="number"
-            value={filtros.anioHasta}
-            onChange={handleChange}
-            placeholder="Año hasta"
-          />
-        </HStack>
+        </FormControl>
 
-        <HStack spacing={4} w="100%">
-          <Button
-            colorScheme="blue"
-            onClick={handleBuscar}
-            isLoading={loading}
-            flex={1}
-          >
-            Buscar
-          </Button>
-          <Button
-            onClick={handleLimpiar}
-            flex={1}
-          >
-            Limpiar
-          </Button>
-        </HStack>
-      </VStack>
+        <FormControl>
+          <FormLabel>Carrera</FormLabel>
+          <Input
+            value={carrera}
+            onChange={(e) => setCarrera(e.target.value)}
+            placeholder="Buscar por carrera"
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>País</FormLabel>
+          <Input
+            value={pais}
+            onChange={(e) => setPais(e.target.value)}
+            placeholder="Buscar por país"
+          />
+        </FormControl>
+
+        <Stack direction="row" spacing={4}>
+          <FormControl>
+            <FormLabel>Año desde</FormLabel>
+            <Input
+              type="number"
+              value={anioDesde}
+              onChange={(e) => setAnioDesde(e.target.value)}
+              placeholder="Año mínimo"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>Año hasta</FormLabel>
+            <Input
+              type="number"
+              value={anioHasta}
+              onChange={(e) => setAnioHasta(e.target.value)}
+              placeholder="Año máximo"
+            />
+          </FormControl>
+        </Stack>
+
+        <Button
+          colorScheme="blue"
+          onClick={handleBuscar}
+          isLoading={loading}
+          loadingText="Buscando..."
+        >
+          Buscar
+        </Button>
+      </Stack>
     </Box>
   )
 } 

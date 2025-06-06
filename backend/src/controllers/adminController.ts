@@ -16,7 +16,12 @@ export const adminController = {
         return res.status(400).json({ error: 'El email ya está registrado' })
       }
 
-      const admin = await AdministradorModel.create({ email, password })
+      const admin = await AdministradorModel.create({ 
+        email, 
+        password,
+        nombre: 'Admin', // Valor por defecto
+        apellido: 'Default' // Valor por defecto
+      })
       res.status(201).json({ id: admin.id, email: admin.email })
     } catch (error) {
       res.status(500).json({ error: 'Error al crear el administrador' })

@@ -3,7 +3,7 @@ apiVersion: secrets.hashicorp.com/v1beta1
 kind: VaultAuth
 metadata:
   name: static-auth
-  namespace: web-internacionales-mapa #Cambiar
+  namespace: web-internacionales-appgraduados #Cambiar
 spec:
   method: kubernetes
   mount: kubernetes
@@ -23,7 +23,7 @@ spec:
   mount: kubernetes
 
   # path of the secret
-  path: web/web-internacionales-mapa/graduados-secrets #Cambiar
+  path: web/internacionales-mapa/graduados-secrets #Cambiar
 
   # dest k8s secret
   destination:
