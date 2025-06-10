@@ -4,7 +4,7 @@ import path from 'path'
 import fs from 'fs'
 
 // Asegurar que el directorio de la base de datos existe
-const dbPath = path.join(__dirname, '../../database.sqlite')
+const dbPath = env.dbPath || path.join(__dirname, '../../database.sqlite')
 const dbDir = path.dirname(dbPath)
 
 if (!fs.existsSync(dbDir)) {

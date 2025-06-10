@@ -4,7 +4,10 @@ metadata:
   name: graduados-ingress
   namespace: web-internacionales-appgraduados
   annotations:
-    #nginx.ingress.kubernetes.io/rewrite-target: /$2
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
     cert-manager.io/cluster-issuer: "letsencrypt"
     nginx.ingress.kubernetes.io/proxy-body-size: 16224m
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "1200"
@@ -14,29 +17,35 @@ metadata:
     nginx.ingress.kubernetes.io/modsecurity-snippet: |
       SecRuleEngine On
       SecRequestBodyAccess On
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
     - internacionalesgraduados.unicen.edu.ar
-    secretName: internacionalesgraduados.unicen.edu.ar
+    secretName: graduados-tls
   rules:
   - host: internacionalesgraduados.unicen.edu.ar
     http:
       paths:
-      - path: /
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: graduados-frontend
-            port:
-              number: 80
-      - path: /api(/|$)(.*)
-        pathType: ImplementationSpecific
+      - path: /graduados/api(/|$)(.*)
+        pathType: Prefix
         backend:
           service:
             name: graduados-backend
             port:
               number: 3000
+      - path: /graduados/socket.io(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: graduados-backend
+            port:
+              number: 3000
+      - path: /graduados(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: graduados-frontend
+            port:
+              number: 80

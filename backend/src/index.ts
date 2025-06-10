@@ -44,14 +44,11 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 // Función para iniciar el servidor
 const startServer = async () => {
   try {
-    // Sincronizar base de datos
     await sequelize.sync()
-    console.log('Base de datos sincronizada correctamente')
-
-    // Iniciar servidor
-    const PORT = env.port || 3000
-    httpServer.listen(PORT, () => {
-      console.log(`Servidor corriendo en http://localhost:${PORT}`)
+    const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
+    const port = typeof env.port === 'string' ? parseInt(env.port) : env.port
+    app.listen(port, host, () => {
+      console.log(`Servidor corriendo en http://${host}:${port}`)
     })
   } catch (error) {
     console.error('Error al iniciar el servidor:', error)
