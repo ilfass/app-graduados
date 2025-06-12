@@ -37,7 +37,7 @@ export const env = {
   },
 
   // Frontend URL
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
+  frontendUrl: process.env.FRONTEND_URL || 'local:5173'
 }
 
 // Validar variables de entorno requeridas

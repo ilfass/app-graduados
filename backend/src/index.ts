@@ -12,7 +12,7 @@ const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
   cors: {
-    origin: env.frontendUrl,
+    origin: '*',
     methods: ['GET', 'POST']
   }
 })
@@ -47,7 +47,7 @@ const startServer = async () => {
     await sequelize.sync()
     const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
     const port = typeof env.port === 'string' ? parseInt(env.port) : env.port
-    app.listen(port, host, () => {
+    httpServer.listen(port, host, () => {
       console.log(`Servidor corriendo en http://${host}:${port}`)
     })
   } catch (error) {
