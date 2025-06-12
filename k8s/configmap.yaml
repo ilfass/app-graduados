@@ -15,7 +15,3 @@ data:
   DB_PORT: "0"
   # DB_HOST eliminado ya que usamos SQLite
   # La base de datos se almacena en el PVC graduados-db-pvc 
-  
-  # Frontend config
-  VITE_API_URL: "/api"
-  VITE_SOCKET_URL: "/socket.io" 
