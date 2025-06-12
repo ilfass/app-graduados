@@ -16,7 +16,7 @@ services:
       - SMTP_PORT=587
       - SMTP_SECURE=false
       - SMTP_FROM=relaciones.internacionales@rec.unicen.edu.ar
-      - FRONTEND_URL=http://localhost
+      - FRONTEND_URL=https://internacionalesgraduados.unicen.edu.ar/
       - ADMIN_EMAIL=relaciones.internacionales@rec.unicen.edu.ar
     volumes:
       - ../backend/data:/app/data

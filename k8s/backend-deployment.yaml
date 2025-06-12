@@ -14,10 +14,10 @@ spec:
         app: graduados-backend
     spec:
       imagePullSecrets:
-      - name: harbor.unicen.edu.ar
+      - name: harbor-secret
       containers:
       - name: backend
-        image: harbor.unicen.edu.ar/web/graduados-backend:1.0
+        image: harbor.unicen.edu.ar/web/graduados-backend:1.1
         imagePullPolicy: Always    
         env:
         - name: DB_PATH

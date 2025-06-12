@@ -10,6 +10,7 @@ import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/admin/ResetPassword'
 import NavigationButtons from './components/NavigationButtons'
+import { TestPage } from './pages/TestPage'
 
 const AppRoutes = () => {
   return (
@@ -52,6 +53,7 @@ const AppRoutes = () => {
         {/* Rutas públicas */}
         <Route path="/mapa" element={<GraduadosMap />} />
         <Route path="/busqueda" element={<Busqueda />} />
+        <Route path="/test" element={<TestPage />} />
       </Routes>
       <NavigationButtons />
     </>

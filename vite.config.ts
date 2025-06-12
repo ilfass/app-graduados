@@ -6,12 +6,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/graduados/api': {
+      '/api': {
         target: 'http://localhost:3000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/graduados\/api/, '/api')
+        changeOrigin: true
       },
-      '/graduados/socket.io': {
+      '/socket.io': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         ws: true

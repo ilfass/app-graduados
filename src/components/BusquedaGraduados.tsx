@@ -38,7 +38,8 @@ export const BusquedaGraduados = ({ onResultados }: BusquedaGraduadosProps) => {
   const handleBuscar = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('http://localhost:3001/api/graduados')
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await axios.get(`${apiUrl}/graduados`)
       let graduados = response.data
 
       // Aplicar filtros

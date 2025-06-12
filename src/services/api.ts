@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// La URL de la API se configura a través de la variable de entorno VITE_API_URL
+// En desarrollo: VITE_API_URL=/api
+// En producción: VITE_API_URL=/api (a través del Ingress)
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_URL,

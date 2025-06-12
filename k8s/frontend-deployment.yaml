@@ -13,6 +13,8 @@ spec:
       labels:
         app: graduados-frontend
     spec:
+      imagePullSecrets:
+      - name: harbor-secret
       containers:
       - name: frontend
         image: harbor.unicen.edu.ar/web/graduados-frontend:1.1
@@ -20,9 +22,9 @@ spec:
         - containerPort: 80
         env:
         - name: VITE_API_URL
-          value: "/graduados/api"
+          value: "/api"
         - name: VITE_SOCKET_URL
-          value: "/graduados/socket.io"
+          value: "/socket.io"
         resources:
           requests:
             memory: "128Mi"

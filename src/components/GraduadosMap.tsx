@@ -62,8 +62,11 @@ export const GraduadosMap = () => {
   useEffect(() => {
     fetchGraduados()
 
-    // Configurar Socket.IO
-    socketRef.current = io('http://localhost:3000')
+    // Configurar Socket.IO usando la variable de entorno VITE_SOCKET_URL
+    // En desarrollo: VITE_SOCKET_URL=/socket.io
+    // En producción: VITE_SOCKET_URL=/socket.io (a través del Ingress)
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || '/socket.io';
+    socketRef.current = io(socketUrl);
 
     // Escuchar actualizaciones de graduados
     socketRef.current.on('graduadoActualizado', (data: { id: number; latitud: number; longitud: number }) => {
