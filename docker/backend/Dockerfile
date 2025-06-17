@@ -1,4 +1,5 @@
-FROM node:18
+# Etapa de construcción
+FROM node:18 as build
 
 WORKDIR /app
 
@@ -8,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar archivos de configuración y dependencias
+# Copiar archivos de configuración
 COPY backend/package*.json ./
 COPY backend/tsconfig.json ./
 
@@ -18,19 +19,38 @@ RUN npm install
 # Copiar el código fuente
 COPY backend/src ./src
 
-# Compilar TypeScript
+# Construir la aplicación
 RUN npm run build
 
-# Crear directorio para la base de datos y establecer permisos
+# Etapa de producción
+FROM node:18-slim
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    sqlite3 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar archivos necesarios
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY backend/package*.json ./
+
+# Crear directorio para la base de datos
 RUN mkdir -p /app/data && \
     chown -R node:node /app
 
-EXPOSE 3000
-
+# Cambiar al usuario node
 USER node
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || exit 1
+# Exponer el puerto
+EXPOSE 3000
 
-CMD ["npm", "start"] 
+# Comando para verificar la salud
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f ${API_URL:-/api}/health || exit 1
+
+# Iniciar la aplicación
+CMD ["node", "dist/index.js"] 

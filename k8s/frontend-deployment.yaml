@@ -19,7 +19,7 @@ spec:
         fsGroup: 101
       containers:
       - name: frontend
-        image: harbor.unicen.edu.ar/web/graduados-frontend:4.3.2
+        image: harbor.unicen.edu.ar/web/graduados-frontend:5.0.1
         ports:
         - containerPort: 80
         env:

@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: graduados-ingress
+  name: graduados-api
   namespace: web-internacionales-appgraduados
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
@@ -15,10 +15,17 @@ spec:
   - host: internacionalesgraduados.unicen.edu.ar
     http:
       paths:
-      - path: /
+      - path: /api
         pathType: Prefix
         backend:
           service:
-            name: graduados-frontend
+            name: graduados-backend
             port:
-              number: 80
+              number: 3000
+      - path: /socket.io
+        pathType: Prefix
+        backend:
+          service:
+            name: graduados-backend
+            port:
+              number: 3000
