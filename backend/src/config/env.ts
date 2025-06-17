@@ -1,13 +1,8 @@
 import dotenv from 'dotenv'
 import path from 'path'
 
-// Cargar variables de entorno
-const result = dotenv.config({ path: path.join(__dirname, '../../.env') })
-
-if (result.error) {
-  console.error('Error al cargar el archivo .env:', result.error)
-  process.exit(1)
-}
+// Intentar cargar variables de entorno, pero no fallar si no existe
+dotenv.config({ path: path.join(__dirname, '../../.env') })
 
 console.log('Variables de entorno cargadas:', {
   port: process.env.PORT,
@@ -24,20 +19,20 @@ export const env = {
   dbPath: process.env.DB_PATH || './database.sqlite',
 
   // JWT
-  jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
+  jwtSecret: process.env.JWT_SECRET || 'test_secret_key_123',
 
   // Email
   smtp: {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: process.env.SMTP_SECURE === 'true',
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.SMTP_USER || 'test@example.com',
+    pass: process.env.SMTP_PASS || 'test_password',
     from: process.env.SMTP_FROM || 'graduados@unicen.edu.ar'
   },
 
   // Frontend URL
-  frontendUrl: process.env.FRONTEND_URL || 'local:5173'
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:80'
 }
 
 // Validar variables de entorno requeridas
@@ -45,6 +40,6 @@ const requiredEnvVars = ['JWT_SECRET', 'SMTP_USER', 'SMTP_PASS']
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
-    console.warn(`⚠️  Advertencia: La variable de entorno ${envVar} no está definida`)
+    console.warn(`⚠️  Advertencia: La variable de entorno ${envVar} no está definida, usando valor por defecto`)
   }
 } 

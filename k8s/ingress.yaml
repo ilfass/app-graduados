@@ -4,43 +4,43 @@ metadata:
   name: graduados-ingress
   namespace: web-internacionales-appgraduados
   annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/use-regex: "true" 
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # kubernetes.io/ingress.class: "nginx"
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/use-regex: "true" 
+    # nginx.ingress.kubernetes.io/rewrite-target: /$2
     cert-manager.io/cluster-issuer: "letsencrypt"
-    nginx.ingress.kubernetes.io/proxy-body-size: 16224m
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "1200"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "1200"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "1200"
-    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
-    nginx.ingress.kubernetes.io/modsecurity-snippet: |
-      SecRuleEngine On
-      SecRequestBodyAccess On
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "X-Content-Type-Options: nosniff" always;
-      more_set_headers "X-Frame-Options: DENY" always;
-      more_set_headers "X-XSS-Protection: 1; mode=block" always;
-      more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains" always;
-      more_set_headers "Access-Control-Allow-Origin: *" always;
-      more_set_headers "Access-Control-Allow-Methods: GET, POST, OPTIONS" always;
-      more_set_headers "Access-Control-Allow-Headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type" always;
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location ~* \.(js|mjs)$ {
-        default_type application/javascript;
-        add_header Content-Type application/javascript;
-        add_header X-Content-Type-Options nosniff;
-        add_header Cache-Control "public, max-age=31536000";
-        try_files $uri $uri/ /index.html;
-      }
-      location ~* \.css$ {
-        default_type text/css;
-        add_header Content-Type text/css;
-        add_header X-Content-Type-Options nosniff;
-        add_header Cache-Control "public, max-age=31536000";
-        try_files $uri $uri/ /index.html;
-      }
+    # nginx.ingress.kubernetes.io/proxy-body-size: 16224m
+    # nginx.ingress.kubernetes.io/proxy-connect-timeout: "1200"
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "1200"
+    # nginx.ingress.kubernetes.io/proxy-send-timeout: "1200"
+    # nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    # nginx.ingress.kubernetes.io/modsecurity-snippet: |
+    #   SecRuleEngine On
+    #   SecRequestBodyAccess On
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/configuration-snippet: |
+    #   more_set_headers "X-Content-Type-Options: nosniff" always;
+    #   more_set_headers "X-Frame-Options: DENY" always;
+    #   more_set_headers "X-XSS-Protection: 1; mode=block" always;
+    #   more_set_headers "Strict-Transport-Security: max-age=31536000; includeSubDomains" always;
+    #   more_set_headers "Access-Control-Allow-Origin: *" always;
+    #   more_set_headers "Access-Control-Allow-Methods: GET, POST, OPTIONS" always;
+    #   more_set_headers "Access-Control-Allow-Headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type" always;
+    # nginx.ingress.kubernetes.io/server-snippet: |
+    #   location ~* \.(js|mjs)$ {
+    #     default_type application/javascript;
+    #     add_header Content-Type application/javascript;
+    #     add_header X-Content-Type-Options nosniff;
+    #     add_header Cache-Control "public, max-age=31536000";
+    #     try_files $uri $uri/ /index.html;
+    #   }
+    #   location ~* \.css$ {
+    #     default_type text/css;
+    #     add_header Content-Type text/css;
+    #     add_header X-Content-Type-Options nosniff;
+    #     add_header Cache-Control "public, max-age=31536000";
+    #     try_files $uri $uri/ /index.html;
+    #   }
 spec:
   ingressClassName: nginx
   tls:
@@ -51,21 +51,22 @@ spec:
   - host: internacionalesgraduados.unicen.edu.ar
     http:
       paths:
-      - path: /api(/|$)(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: graduados-backend
-            port:
-              number: 3000
-      - path: /socket.io(/|$)(.*)
-        pathType: Prefix
-        backend:
-          service:
-            name: graduados-backend
-            port:
-              number: 3000
-      - path: /(.*)
+      # - path: /api(/|$)(.*)
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: graduados-backend
+      #       port:
+      #         number: 3000
+      # - path: /socket.io(/|$)(.*)
+      #   pathType: Prefix
+      #   backend:
+      #     service:
+      #       name: graduados-backend
+      
+      #       port:
+      #         number: 3000
+      - path: /
         pathType: Prefix
         backend:
           service:

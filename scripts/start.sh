@@ -96,9 +96,59 @@ check_services() {
     fi
 }
 
+# Función para crear usuario de prueba
+create_test_user() {
+    echo -e "${YELLOW}Creando usuario de prueba...${NC}"
+    
+    # Datos del usuario de prueba
+    local user_data='{
+        "nombre": "Usuario",
+        "apellido": "Prueba",
+        "email": "test@example.com",
+        "password": "Test123!",
+        "pais": "Argentina",
+        "ciudad": "Tandil",
+        "latitud": -37.3217,
+        "longitud": -59.1332,
+        "carrera": "Ingeniería en Sistemas",
+        "anioGraduacion": 2023,
+        "institucion": "Universidad Nacional del Centro"
+    }'
+    
+    # Registrar usuario
+    local response=$(curl -s -X POST http://localhost:3000/api/graduados/register \
+        -H "Content-Type: application/json" \
+        -d "$user_data")
+    
+    if [[ $response == *"success"* ]]; then
+        echo -e "${GREEN}✅ Usuario de prueba creado${NC}"
+    else
+        echo -e "${YELLOW}⚠️ Usuario de prueba ya existe o hubo un error${NC}"
+    fi
+}
+
+# Función para mostrar información de acceso
+show_access_info() {
+    echo -e "\n${GREEN}=== Información de Acceso ===${NC}"
+    echo -e "\n${YELLOW}URLs:${NC}"
+    echo -e "Frontend: ${GREEN}http://localhost${NC}"
+    echo -e "Backend: ${GREEN}http://localhost:3000${NC}"
+    
+    echo -e "\n${YELLOW}Credenciales de Administrador:${NC}"
+    echo -e "Email: ${GREEN}admin@unicen.edu.ar${NC}"
+    echo -e "Contraseña: ${GREEN}Admin123!${NC}"
+    
+    echo -e "\n${YELLow}Credenciales de Usuario de Prueba:${NC}"
+    echo -e "Email: ${GREEN}test@example.com${NC}"
+    echo -e "Contraseña: ${GREEN}Test123!${NC}"
+    
+    echo -e "\n${YELLOW}Para detener la aplicación:${NC}"
+    echo -e "Ejecuta: ${GREEN}docker-compose down${NC}"
+}
+
 # Función principal
 main() {
-    echo -e "${GREEN}🚀 Iniciando setup automático...${NC}"
+    echo -e "${GREEN}🚀 Iniciando aplicación...${NC}"
     
     # Verificar dependencias
     check_dependencies
@@ -120,11 +170,14 @@ main() {
     # Verificar servicios
     check_services
     
-    echo -e "${GREEN}✅ Setup completado exitosamente${NC}"
-    echo -e "${YELLOW}La aplicación está disponible en:${NC}"
-    echo -e "Frontend: ${GREEN}http://localhost${NC}"
-    echo -e "Backend: ${GREEN}http://localhost:3000${NC}"
+    # Crear usuario de prueba
+    create_test_user
+    
+    # Mostrar información de acceso
+    show_access_info
+    
+    echo -e "\n${GREEN}✅ Aplicación iniciada exitosamente${NC}"
 }
 
 # Ejecutar función principal
-main
+main 

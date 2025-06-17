@@ -9,7 +9,10 @@
     "start": "node dist/index.js",
     "test": "jest",
     "create-admin": "ts-node src/scripts/createAdmin.ts",
-    "update-admin": "ts-node src/scripts/updateAdmin.ts"
+    "update-admin": "ts-node src/scripts/updateAdmin.ts",
+    "create-graduados": "ts-node src/scripts/createGraduados.ts",
+    "migrate": "ts-node src/scripts/runMigration.ts",
+    "sync-db": "ts-node src/scripts/syncDatabase.ts"
   },
   "keywords": [],
   "author": "",
