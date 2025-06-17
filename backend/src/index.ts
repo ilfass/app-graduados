@@ -10,29 +10,43 @@ import { env } from './config/env'
 
 const app = express()
 const httpServer = createServer(app)
+
+// Configuración de CORS
+const corsOptions = {
+  origin: ['http://localhost:80', 'http://localhost', env.frontendUrl],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}
+
+app.use(cors(corsOptions))
+
+// Configuración de Socket.IO
 const io = new Server(httpServer, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
+  cors: corsOptions,
+  transports: ['websocket', 'polling']
 })
 
 // Hacer el objeto io disponible en toda la aplicación
 app.set('io', io)
 
 // Middleware
-app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Rutas
-app.use('/api/graduados', graduadoRoutes)
 app.use('/api/auth', authRoutes)
+app.use('/api/graduados', graduadoRoutes)
 app.use('/api/admin', adminRoutes)
 
 // Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ message: 'API de Graduados UNICEN' })
+})
+
+// Endpoint de salud
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' })
 })
 
 // Manejo de errores
@@ -45,10 +59,9 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 const startServer = async () => {
   try {
     await sequelize.sync()
-    const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost'
     const port = typeof env.port === 'string' ? parseInt(env.port) : env.port
-    httpServer.listen(port, host, () => {
-      console.log(`Servidor corriendo en http://${host}:${port}`)
+    httpServer.listen(port, '0.0.0.0', () => {
+      console.log(`Servidor corriendo en http://0.0.0.0:${port}`)
     })
   } catch (error) {
     console.error('Error al iniciar el servidor:', error)

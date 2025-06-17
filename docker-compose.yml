@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - data:/app/data
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - JWT_SECRET=test_secret_key_123
+      - DB_PATH=/app/data/database.sqlite
+      - FRONTEND_URL=http://localhost:80
+      - ADMIN_EMAIL=admin@unicen.edu.ar
+      - SMTP_USER=test@example.com
+      - SMTP_PASS=test_password
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+      - VITE_SOCKET_URL=http://localhost:3000/socket.io
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  data: 
