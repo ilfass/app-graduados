@@ -17,7 +17,8 @@ spec:
       - name: harbor.unicen.edu.ar
       containers:
       - name: backend
-        image: harbor.unicen.edu.ar/web/graduados-backend:4.1.1
+        image: harbor.unicen.edu.ar/web/graduados-backend:1.1
+        imagePullPolicy: Always    
         env:
         - name: DB_PATH
           valueFrom:

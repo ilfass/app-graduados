@@ -14,10 +14,12 @@ spec:
         app: graduados-frontend
     spec:
       imagePullSecrets:
-      - name: harbor-secret
+      - name: harbor.unicen.edu.ar
+      securityContext:
+        fsGroup: 101
       containers:
       - name: frontend
-        image: harbor.unicen.edu.ar/web/graduados-frontend:1.1
+        image: harbor.unicen.edu.ar/web/graduados-frontend:4.3.0
         ports:
         - containerPort: 80
         env:
@@ -31,4 +33,30 @@ spec:
             cpu: "100m"
           limits:
             memory: "256Mi"
-            cpu: "200m" 
+            cpu: "200m"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        securityContext:
+          runAsUser: 101
+          runAsGroup: 101
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - name: nginx-cache
+          mountPath: /var/cache/nginx
+        - name: nginx-tmp
+          mountPath: /var/run
+      volumes:
+      - name: nginx-cache
+        emptyDir: {}
+      - name: nginx-tmp
+        emptyDir: {} 

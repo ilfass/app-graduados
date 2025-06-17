@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graduados-frontend
+  namespace: web-internacionales-appgraduados
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graduados-frontend
+  template:
+    metadata:
+      labels:
+        app: graduados-frontend
+    spec:
+      imagePullSecrets:
+      - name: harbor-secret
+      containers:
+      - name: frontend
+        image: harbor.unicen.edu.ar/web/graduados-frontend:1.1
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_API_URL
+          value: "/api"
+        - name: VITE_SOCKET_URL
+          value: "/socket.io"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m" 

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: graduados-config
+  namespace: web-internacionales-appgraduados
+data:
+  # Backend config
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "587"
+  SMTP_SECURE: "false"
+  SMTP_FROM: "fa07fa@gmail.com"
+  FRONTEND_URL: "https://internacionalesgraduados.unicen.edu.ar"
+  DB_PATH: "/app/data/database.sqlite"
+  ADMIN_EMAIL: "fa07fa@gmail.com"
+  DB_PORT: "0"
+  # DB_HOST eliminado ya que usamos SQLite
+  # La base de datos se almacena en el PVC graduados-db-pvc 

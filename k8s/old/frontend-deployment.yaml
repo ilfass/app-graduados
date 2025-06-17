@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graduados-frontend
+  namespace: web-internacionales-appgraduados
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: graduados-frontend
+  template:
+    metadata:
+      labels:
+        app: graduados-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: harbor.unicen.edu.ar/web/graduados-frontend:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m" 
