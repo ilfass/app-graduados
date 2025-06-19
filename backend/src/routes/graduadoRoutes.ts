@@ -21,8 +21,9 @@ router.delete('/profile', graduadoController.deleteProfile)
 // Rutas de administrador
 router.get('/', adminAuth, graduadoController.getAll)
 router.get('/:id', adminAuth, graduadoController.getById)
-router.put('/:id/estado', adminAuth, graduadoController.updateEstado)
+router.put('/:id/estado', adminAuth, graduadoController.updateStatus)
 router.put('/:id/reset-password', adminAuth, graduadoController.resetPassword)
+router.put('/:id/observaciones', adminAuth, graduadoController.updateObservaciones)
 router.delete('/:id', adminAuth, graduadoController.delete)
 
 // Nueva ruta para actualizar estado y calcular coordenadas

@@ -171,9 +171,20 @@ export const graduadoController = {
           'ciudad', 
           'pais', 
           'institucion',
+          'lugar_trabajo',
+          'area_desempeno',
+          'sector_trabajo',
+          'vinculado_unicen',
+          'areas_vinculacion',
+          'interes_proyectos',
+          'linkedin',
+          'biografia',
           'estado',
+          'observaciones_admin',
           'latitud', 
-          'longitud'
+          'longitud',
+          'created_at',
+          'updated_at'
         ]
       })
       console.log('Graduados encontrados en la base de datos:', graduados);
@@ -187,14 +198,43 @@ export const graduadoController = {
   // Obtener un graduado por ID
   async getById(req: Request, res: Response) {
     try {
-      const graduado = await Graduado.findByPk(req.params.id)
+      const { id } = req.params;
+      const graduado = await Graduado.findByPk(id, {
+        attributes: [
+          'id', 
+          'nombre', 
+          'apellido', 
+          'email',
+          'carrera', 
+          'anio_graduacion',
+          'ciudad', 
+          'pais', 
+          'institucion',
+          'lugar_trabajo',
+          'area_desempeno',
+          'sector_trabajo',
+          'vinculado_unicen',
+          'areas_vinculacion',
+          'interes_proyectos',
+          'linkedin',
+          'biografia',
+          'estado',
+          'observaciones_admin',
+          'latitud', 
+          'longitud',
+          'created_at',
+          'updated_at'
+        ]
+      });
+
       if (!graduado) {
-        return res.status(404).json({ error: 'Graduado no encontrado' })
+        return res.status(404).json({ message: 'Graduado no encontrado' });
       }
-      res.json(graduado)
+
+      res.json(graduado);
     } catch (error) {
-      console.error('Error al obtener graduado:', error)
-      res.status(500).json({ error: 'Error al obtener graduado' })
+      console.error('Error al obtener graduado:', error);
+      res.status(500).json({ message: 'Error al obtener graduado' });
     }
   },
 
@@ -819,6 +859,26 @@ export const graduadoController = {
     } catch (error) {
       console.error('Error al eliminar perfil:', error);
       res.status(500).json({ error: 'Error al eliminar el perfil' });
+    }
+  },
+
+  // Actualizar observaciones del administrador
+  async updateObservaciones(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { observaciones } = req.body;
+
+      const graduado = await Graduado.findByPk(id);
+      if (!graduado) {
+        return res.status(404).json({ message: 'Graduado no encontrado' });
+      }
+
+      await graduado.update({ observaciones_admin: observaciones });
+
+      res.json({ message: 'Observaciones actualizadas correctamente' });
+    } catch (error) {
+      console.error('Error al actualizar observaciones:', error);
+      res.status(500).json({ message: 'Error al actualizar observaciones' });
     }
   }
 } 

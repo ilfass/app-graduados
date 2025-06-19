@@ -17,7 +17,7 @@ spec:
       - name: harbor.unicen.edu.ar
       containers:
       - name: backend
-        image: harbor.unicen.edu.ar/web/graduados-backend:5.0.0
+        image: harbor.unicen.edu.ar/web/graduados-backend:5.2.0
         env:
         - name: DB_PATH
           valueFrom:

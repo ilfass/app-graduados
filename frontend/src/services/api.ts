@@ -56,6 +56,12 @@ export interface Graduado {
   ciudad: string;
   pais: string;
   institucion?: string;
+  lugar_trabajo?: string;
+  area_desempeno?: string;
+  sector_trabajo?: string;
+  vinculado_unicen?: boolean;
+  areas_vinculacion?: string;
+  interes_proyectos?: boolean;
   linkedin?: string;
   biografia?: string;
   estado?: 'pendiente' | 'aprobado' | 'rechazado';
@@ -64,6 +70,8 @@ export interface Graduado {
   observaciones_admin?: string;
   latitud?: number;
   longitud?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const graduadoService = {
@@ -218,6 +226,11 @@ export const adminService = {
     return response.data;
   },
 
+  getGraduadoById: async (id: number) => {
+    const response = await api.get(`/admin/graduados/${id}`);
+    return response.data;
+  },
+
   getDashboardStats: async () => {
     const response = await api.get('/admin/dashboard-stats');
     return response.data;
@@ -225,6 +238,11 @@ export const adminService = {
 
   updateGraduadoStatus: async (id: number, estado: 'aprobado' | 'rechazado') => {
     const response = await api.put(`/graduados/${id}/estado`, { estado });
+    return response.data;
+  },
+
+  updateGraduadoObservaciones: async (id: number, observaciones: string) => {
+    const response = await api.put(`/admin/graduados/${id}/observaciones`, { observaciones });
     return response.data;
   },
 

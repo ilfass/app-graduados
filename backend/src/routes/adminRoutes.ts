@@ -16,7 +16,10 @@ router.delete('/:id', adminController.delete)
 // Ruta para estadísticas del dashboard
 router.get('/dashboard-stats', adminController.dashboardStats)
 
-// Ruta para obtener todos los graduados (solo admin)
+// Rutas para graduados (solo admin)
 router.get('/graduados', graduadoController.getAll)
+router.get('/graduados/:id', graduadoController.getById)
+router.put('/graduados/:id/observaciones', graduadoController.updateObservaciones)
+router.put('/graduados/:id/estado', graduadoController.updateStatus)
 
 export default router 

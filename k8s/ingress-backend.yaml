@@ -5,6 +5,15 @@ metadata:
   namespace: web-internacionales-appgraduados
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/modsecurity-snippet: |
+      SecRuleEngine On
+      SecRequestBodyAccess On
+      SecRule REQUEST_METHOD "@streq PUT" "id:1001,phase:1,chain,nolog,pass"
+      SecRule REQUEST_URI "@streq /api/graduados/1/estado" "ctl:ruleEngine=Off"
+      SecRule REQUEST_URI "@beginsWith /socket.io/" "id:1000,phase:1,ctl:ruleEngine=Off,nolog,pass"
+      SecRule REQUEST_METHOD "@streq PUT" "id:1003,phase:1,chain,nolog,pass"
+      SecRule REQUEST_URI "@rx ^/api/graduados/[0-9]+/estado$" "ctl:ruleEngine=Off"
 spec:
   ingressClassName: nginx
   tls:

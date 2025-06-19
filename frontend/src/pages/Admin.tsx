@@ -21,6 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { FiUsers, FiMap, FiSearch, FiSettings } from 'react-icons/fi';
 import Graduados from './admin/Graduados';
+import GraduadoDetalle from './admin/GraduadoDetalle';
 import Configuracion from './admin/Configuracion';
 import { useEffect, useState } from 'react';
 import { adminService, graduadoService } from '../services/api';
@@ -168,52 +169,58 @@ const Dashboard = () => {
                       throw new Error('No se recibieron datos válidos');
                     }
                     
-                    // Crear encabezados del CSV
+                    // Crear encabezados del CSV con todos los campos
                     const headers = [
                       'ID',
                       'Nombre',
                       'Apellido',
                       'Email',
                       'Carrera',
-                      'Institución',
                       'Año Graduación',
                       'Ciudad',
                       'País',
-                      'Estado',
+                      'Institución',
+                      'Lugar de Trabajo',
+                      'Área de Desempeño',
+                      'Sector de Trabajo',
+                      'Vinculado UNICEN',
+                      'Áreas Vinculación',
+                      'Interés Proyectos',
                       'LinkedIn',
+                      'Biografía',
+                      'Estado',
+                      'Observaciones Admin',
                       'Latitud',
-                      'Longitud'
+                      'Longitud',
+                      'Fecha Registro',
+                      'Última Actualización'
                     ].join(',');
 
                     // Convertir datos a formato CSV
-                    const csvRows = response.map((graduado: {
-                      id: number;
-                      nombre: string;
-                      apellido: string;
-                      email: string;
-                      carrera: string;
-                      institucion?: string;
-                      anio_graduacion: number;
-                      ciudad?: string;
-                      pais?: string;
-                      estado: string;
-                      linkedin?: string;
-                      latitud?: number;
-                      longitud?: number;
-                    }) => [
+                    const csvRows = response.map((graduado: any) => [
                       graduado.id,
-                      `"${graduado.nombre}"`,
-                      `"${graduado.apellido}"`,
-                      `"${graduado.email}"`,
-                      `"${graduado.carrera}"`,
-                      `"${graduado.institucion || ''}"`,
-                      graduado.anio_graduacion,
+                      `"${graduado.nombre || ''}"`,
+                      `"${graduado.apellido || ''}"`,
+                      `"${graduado.email || ''}"`,
+                      `"${graduado.carrera || ''}"`,
+                      graduado.anio_graduacion || '',
                       `"${graduado.ciudad || ''}"`,
                       `"${graduado.pais || ''}"`,
-                      `"${graduado.estado}"`,
+                      `"${graduado.institucion || ''}"`,
+                      `"${graduado.lugar_trabajo || ''}"`,
+                      `"${graduado.area_desempeno || ''}"`,
+                      `"${graduado.sector_trabajo || ''}"`,
+                      graduado.vinculado_unicen ? 'Sí' : 'No',
+                      `"${graduado.areas_vinculacion || ''}"`,
+                      graduado.interes_proyectos ? 'Sí' : 'No',
                       `"${graduado.linkedin || ''}"`,
+                      `"${graduado.biografia || ''}"`,
+                      `"${graduado.estado || ''}"`,
+                      `"${graduado.observaciones_admin || ''}"`,
                       graduado.latitud || '',
-                      graduado.longitud || ''
+                      graduado.longitud || '',
+                      graduado.created_at ? new Date(graduado.created_at).toLocaleDateString() : '',
+                      graduado.updated_at ? new Date(graduado.updated_at).toLocaleDateString() : ''
                     ].join(','));
 
                     // Combinar encabezados y datos
@@ -224,27 +231,25 @@ const Dashboard = () => {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `graduados_${new Date().toISOString().split('T')[0]}.csv`;
+                    a.download = `graduados_completo_${new Date().toISOString().split('T')[0]}.csv`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
 
                     toast({
-                      title: 'Éxito',
-                      description: 'Datos de graduados exportados correctamente',
+                      title: 'Descarga exitosa',
+                      description: 'Archivo CSV descargado correctamente',
                       status: 'success',
                       duration: 3000,
-                      isClosable: true,
                     });
                   } catch (error) {
-                    console.error('Error al exportar datos:', error);
+                    console.error('Error al descargar CSV:', error);
                     toast({
                       title: 'Error',
-                      description: 'No se pudieron exportar los datos de los graduados',
+                      description: 'No se pudo descargar el archivo CSV',
                       status: 'error',
                       duration: 3000,
-                      isClosable: true,
                     });
                   }
                 }}
@@ -253,9 +258,9 @@ const Dashboard = () => {
                 height="100px"
               >
                 <VStack>
-                  <Text>Exportar Datos</Text>
+                  <Text>Descargar Datos</Text>
                   <Text fontSize="sm" color="gray.500">
-                    Descargar datos de graduados en CSV
+                    Exportar todos los graduados
                   </Text>
                 </VStack>
               </Button>
@@ -320,6 +325,7 @@ const Admin = () => {
       <Route path="/" element={<Dashboard />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/graduados" element={<Graduados />} />
+      <Route path="/graduado-detalle/:id" element={<GraduadoDetalle />} />
       <Route path="/configuracion" element={<Configuracion />} />
     </Routes>
   );

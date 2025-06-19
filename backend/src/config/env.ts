@@ -19,7 +19,7 @@ export const env = {
   dbPath: process.env.DB_PATH || './database.sqlite',
 
   // JWT
-  jwtSecret: process.env.JWT_SECRET || 'test_secret_key_123',
+  jwtSecret: process.env.JWT_SECRET || '0bKsfW2zTYReeFSL5baNJ16Dqhmwnfi143hKdA46LqY=',
 
   // Email
   smtp: {

@@ -16,10 +16,12 @@ import {
   InputLeftElement,
   Flex,
   Select,
-  VStack
+  VStack,
+  HStack
 } from '@chakra-ui/react';
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch, FiEye } from 'react-icons/fi';
 import { adminService } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 interface Graduado {
   id: number;
@@ -36,6 +38,7 @@ const Graduados = () => {
   const [registros, setRegistros] = useState<Graduado[]>([]);
   const [filtro, setFiltro] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGraduados = async () => {
@@ -192,6 +195,15 @@ const Graduados = () => {
                         Rechazar
                       </Button>
                     </Box>
+                  </Td>
+                  <Td>
+                    <Button
+                      colorScheme="blue"
+                      size="sm"
+                      onClick={() => navigate(`/admin/graduado-detalle/${registro.id}`)}
+                    >
+                      Ver Detalles
+                    </Button>
                   </Td>
                 </Tr>
               ))}
