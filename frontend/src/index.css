@@ -325,6 +325,37 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+/* Estilos para marcadores de cluster */
+.cluster-marker {
+  filter: hue-rotate(200deg) brightness(1.2);
+  transform: scale(1.1);
+}
+
+.cluster-marker::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background-color: #e53e3e;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Estilos para ubicaciones compartidas */
+.location-shared {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 /* Ajustes responsivos para el mapa */
 @media (max-width: 768px) {
   .map-container {
