@@ -1,0 +1,18 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copiar package.json
+COPY frontend/package*.json ./
+
+# Instalar dependencias
+RUN npm install --legacy-peer-deps
+
+# Copiar código fuente
+COPY frontend/ .
+
+# Exponer puerto
+EXPOSE 80
+
+# Comando por defecto
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "80"]

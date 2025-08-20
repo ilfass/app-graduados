@@ -56,7 +56,7 @@ export interface Graduado {
   ciudad: string;
   pais: string;
   institucion?: string;
-  lugar_trabajo?: string;
+  lugar_trabajo: string;
   area_desempeno?: string;
   sector_trabajo?: string;
   vinculado_unicen?: boolean;
@@ -206,6 +206,18 @@ export const graduadoService = {
   // Obtener graduados para el mapa (ruta pública)
   getForMap: async () => {
     const response = await api.get('/graduados/mapa');
+    return response.data;
+  },
+
+  // Obtener perfil público de un graduado
+  getPublicProfile: async (id: number) => {
+    const response = await api.get(`/graduados/${id}/public`);
+    return response.data;
+  },
+
+  // Obtener graduado aleatorio para destacar
+  getRandomGraduado: async () => {
+    const response = await api.get('/graduados/random');
     return response.data;
   },
 

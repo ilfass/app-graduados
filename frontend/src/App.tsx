@@ -16,6 +16,7 @@ import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/admin/ResetPassword'
 import { TestPage } from './pages/TestPage'
+import GraduadoPublico from './pages/GraduadoPublico'
 import theme from './theme'
 
 const App = () => {
@@ -66,6 +67,7 @@ const App = () => {
                 <Route path="/mapa" element={<GraduadosMap />} />
                 <Route path="/busqueda" element={<Busqueda />} />
                 <Route path="/test" element={<TestPage />} />
+                <Route path="/graduado/:id" element={<GraduadoPublico />} />
               </Routes>
             </Box>
             <NavigationButtons />

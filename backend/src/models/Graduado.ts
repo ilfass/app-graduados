@@ -12,7 +12,7 @@ export class Graduado extends Model {
   declare ciudad: string
   declare pais: string
   declare institucion?: string
-  declare lugar_trabajo?: string
+  declare lugar_trabajo: string
   declare area_desempeno?: 'Ciencias Agrarias, de Ingeniería y de Materiales' | 'Ciencias Biológicas y de la Salud' | 'Ciencias Exactas y Naturales' | 'Ciencias Sociales y Humanidades'
   declare sector_trabajo?: 'Sector privado - Relación de dependencia' | 'Sector privado - Trabajo Independiente' | 'Sector privado - Cooperativa' | 'Sector público - Internacional' | 'Sector público - Nacional' | 'Sector público - Provincial' | 'Sector público - Local' | 'Organismos No Gubernamentales/Asociaciones Civiles - Internacional' | 'Organismos No Gubernamentales/Asociaciones Civiles - Nacional' | 'Organismos No Gubernamentales/Asociaciones Civiles - Local'
   declare vinculado_unicen?: boolean
@@ -78,7 +78,7 @@ Graduado.init(
     },
     lugar_trabajo: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     area_desempeno: {
       type: DataTypes.ENUM(

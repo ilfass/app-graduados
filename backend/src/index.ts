@@ -34,6 +34,9 @@ app.set('io', io)
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+// Servir archivos estáticos desde la carpeta uploads
+app.use('/uploads', express.static('/app/uploads'))
+
 // Rutas
 app.use('/api/auth', authRoutes)
 app.use('/api/graduados', graduadoRoutes)

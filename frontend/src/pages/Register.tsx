@@ -49,7 +49,6 @@ const Register = () => {
     anio_graduacion: '',
     ciudad: '',
     pais: '',
-    institucion: '',
     lugar_trabajo: '',
     area_desempeno: '',
     sector_trabajo: '',
@@ -66,7 +65,7 @@ const Register = () => {
     longitud: undefined as number | undefined,
   })
 
-  const [documentoIdentidad, setDocumentoIdentidad] = useState<File | null>(null)
+
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showMap, setShowMap] = useState(false)
@@ -79,12 +78,7 @@ const Register = () => {
     setFormData(prev => ({ ...prev, [name]: value || '' }))
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setDocumentoIdentidad(file)
-    }
-  }
+
 
   const handleLocationSearch = async () => {
     try {
@@ -200,7 +194,7 @@ const Register = () => {
           </Heading>
           <Alert status="info" mb={4}>
             <InfoIcon mr={2} />
-            Para validar tu identidad como graduado, puedes subir tu documento de identidad
+            Completa el formulario para registrarte como graduado de UNICEN
           </Alert>
         </Box>
 
@@ -416,23 +410,13 @@ const Register = () => {
               </VStack>
             </FormControl>
 
-            <FormControl>
-              <FormLabel>Institución</FormLabel>
-              <Input
-                name="institucion"
-                value={formData.institucion}
-                onChange={handleChange}
-                placeholder="Institución donde te graduaste"
-              />
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>¿Dónde trabajás actualmente?</FormLabel>
+            <FormControl isRequired>
+              <FormLabel>¿Dónde trabajas/estudias actualmente?</FormLabel>
               <Input
                 name="lugar_trabajo"
                 value={formData.lugar_trabajo}
                 onChange={handleChange}
-                placeholder="Lugar de trabajo actual"
+                placeholder="Lugar de trabajo o estudio actual"
               />
             </FormControl>
 
@@ -479,14 +463,18 @@ const Register = () => {
             </FormControl>
 
             <FormControl>
-              <FormLabel>Breve recorrido de tu vida profesional/laboral (BIOGRAFÍA)</FormLabel>
+              <FormLabel>Breve recorrido de tu vida profesional (máximo 250 palabras)</FormLabel>
               <Textarea
                 name="biografia"
                 value={formData.biografia}
                 onChange={handleChange}
-                placeholder="Máximo 400 palabras"
-                maxLength={400}
+                placeholder="Cuéntanos brevemente sobre tu trayectoria profesional..."
+                maxLength={250}
+                rows={4}
               />
+              <Text fontSize="sm" color="gray.500" mt={1}>
+                {formData.biografia.length}/250 palabras
+              </Text>
             </FormControl>
 
             <FormControl>
@@ -537,17 +525,7 @@ const Register = () => {
               />
             </FormControl>
 
-            <FormControl>
-              <FormLabel>Documento de Identidad</FormLabel>
-              <Input
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={handleFileChange}
-              />
-              <Text fontSize="sm" color="gray.500" mt={1}>
-                Opcional: Sube una copia de tu documento de identidad para validar tu identidad
-              </Text>
-            </FormControl>
+
 
             {error && (
               <Alert status="error">

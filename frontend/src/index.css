@@ -1,5 +1,5 @@
 :root {
-  --primary-color: #2563eb;
+  --primary-color: #176782;
   --secondary-color: #1e40af;
   --accent-color: #3b82f6;
   --background-color: #f8fafc;
@@ -48,6 +48,547 @@ nav {
 nav.scrolled {
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: var(--shadow);
+}
+
+/* Estilos para el encabezado principal */
+.css-16om51d {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Estilos alternativos para encabezados */
+h1, .chakra-heading {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Estilos específicos para encabezados con clases CSS específicas */
+.css-1cyd82z,
+.css-1ynjc7a {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Estilos para encabezados del hero section */
+.chakra-heading[class*="css-"] {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Estilos más específicos para encabezados del hero */
+.chakra-heading.css-1cyd82z,
+.chakra-heading.css-1ynjc7a,
+h1.css-1cyd82z,
+h1.css-1ynjc7a {
+  background: transparent !important;
+  color: white !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Estilos para cualquier elemento con estas clases */
+[class*="css-1cyd82z"],
+[class*="css-1ynjc7a"],
+[class*="css-13r49xx"] {
+  background: transparent !important;
+  color: white !important;
+}
+
+/* Estilos para textos de recuadros - todos en negro */
+.chakra-text,
+.chakra-heading,
+.chakra-button {
+  color: black !important;
+}
+
+/* Estilos específicos para textos dentro de recuadros blancos */
+.chakra-text[color="gray.600"],
+.chakra-text[color="gray.700"],
+.chakra-heading[color="gray.700"] {
+  color: black !important;
+}
+
+/* Estilos para todos los textos de recuadros */
+.chakra-text,
+.chakra-heading,
+.chakra-button,
+p,
+span,
+div {
+  color: black !important;
+}
+
+/* Estilos específicos para recuadros blancos */
+.bg-white .chakra-text,
+.bg-white .chakra-heading,
+.bg-white .chakra-button,
+.bg-white p,
+.bg-white span,
+.bg-white div {
+  color: black !important;
+}
+
+/* Estilos para textos con colores específicos que deben ser negros */
+[color="gray.600"],
+[color="gray.700"],
+[color="purple.600"] {
+  color: black !important;
+}
+
+/* Estilos modernos para las tarjetas */
+.modern-card {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9)) !important;
+}
+
+/* Efectos de hover para elementos interactivos */
+.chakra-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Estilos para iconos modernos */
+.chakra-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Estilos para SVGs del recuadro izquierdo - solo bordes azules */
+.modern-card svg,
+.modern-card .chakra-icon,
+.modern-card [class*="chakra-icon"] {
+  color: rgb(59, 130, 246) !important; /* blue.500 */
+  fill: none !important; /* Sin relleno */
+}
+
+/* Estilos específicos para iconos del recuadro de consejos */
+.modern-card .chakra-icon[as="FiUser"],
+.modern-card .chakra-icon[as="FiFileText"],
+.modern-card .chakra-icon[as="FiMapPin"],
+.modern-card .chakra-icon[as="FiStar"],
+.modern-card .chakra-icon[as="FiShare2"] {
+  color: rgb(59, 130, 246) !important; /* blue.500 */
+  fill: rgb(59, 130, 246) !important; /* blue.500 */
+}
+
+/* Estilos para cualquier SVG dentro del recuadro izquierdo - sin relleno */
+.modern-card svg *,
+.modern-card .chakra-icon *,
+.modern-card [class*="chakra-icon"] * {
+  color: rgb(59, 130, 246) !important; /* blue.500 */
+  fill: none !important; /* Sin relleno */
+  stroke: rgb(59, 130, 246) !important; /* blue.500 */
+}
+
+/* Estilos para elementos SVG específicos - solo bordes azules y sombras negras */
+.modern-card path {
+  color: rgb(59, 130, 246) !important; /* blue.500 */
+  fill: none !important; /* Sin relleno */
+  stroke: rgb(59, 130, 246) !important; /* Borde azul */
+  stroke-width: 2px !important;
+}
+
+.modern-card circle {
+  color: rgb(59, 130, 246) !important; /* blue.500 */
+  fill: none !important; /* Sin relleno */
+  stroke: rgb(59, 130, 246) !important; /* Borde azul */
+  stroke-width: 2px !important;
+}
+
+.modern-card rect {
+  color: rgb(59, 130, 246) !important; /* blue.500 */
+  fill: none !important; /* Sin relleno */
+  stroke: rgb(59, 130, 246) !important; /* Borde azul */
+  stroke-width: 2px !important;
+}
+
+.modern-card line {
+  color: rgb(59, 130, 246) !important; /* blue.500 */
+  fill: none !important; /* Sin relleno */
+  stroke: rgb(59, 130, 246) !important; /* Borde azul */
+  stroke-width: 2px !important;
+}
+
+.modern-card polyline,
+.modern-card polygon {
+  color: rgb(59, 130, 246) !important; /* blue.500 */
+  fill: none !important; /* Sin relleno */
+  stroke: rgb(59, 130, 246) !important; /* Borde azul */
+  stroke-width: 2px !important;
+}
+
+/* Efectos adicionales para SVGs del recuadro izquierdo - sombras negras */
+.modern-card svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3)) !important;
+}
+
+.modern-card .chakra-icon {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4)) !important;
+}
+
+/* Efectos hover para iconos */
+.modern-card .chakra-icon:hover {
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6)) !important;
+  transform: scale(1.05) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Estilos para iconos específicos con sombras negras y sin relleno */
+.modern-card .chakra-icon[as="FiUser"] {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) !important;
+  fill: none !important; /* Sin relleno */
+}
+
+.modern-card .chakra-icon[as="FiFileText"] {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) !important;
+  fill: none !important; /* Sin relleno */
+}
+
+.modern-card .chakra-icon[as="FiMapPin"] {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) !important;
+  fill: none !important; /* Sin relleno */
+}
+
+.modern-card .chakra-icon[as="FiStar"] {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) !important;
+  fill: none !important; /* Sin relleno */
+}
+
+.modern-card .chakra-icon[as="FiShare2"] {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) !important;
+  fill: none !important; /* Sin relleno */
+}
+
+/* Estilos adicionales para asegurar que no haya relleno */
+.modern-card * {
+  fill: none !important; /* Sin relleno en ningún elemento */
+}
+
+.modern-card svg,
+.modern-card .chakra-icon {
+  fill: none !important; /* Sin relleno en SVGs e iconos */
+}
+
+/* Estilos para forzar texto blanco en el footer */
+footer {
+  background-color: black !important;
+  color: white !important;
+}
+
+footer * {
+  color: white !important;
+}
+
+footer .chakra-text,
+footer .chakra-heading,
+footer p,
+footer span,
+footer div {
+  color: white !important;
+}
+
+/* Estilos específicos para el texto del footer */
+footer [color="gray.300"],
+footer [color="gray.600"],
+footer [color="gray.700"] {
+  color: white !important;
+}
+
+/* Estilos adicionales para el footer - forzar blanco */
+footer .chakra-text[color="gray.300"],
+footer .chakra-text[color="gray.600"],
+footer .chakra-text[color="gray.700"],
+footer .chakra-text[color="white"] {
+  color: white !important;
+}
+
+/* Estilos para cualquier elemento del footer */
+footer .chakra-text,
+footer .chakra-heading,
+footer p,
+footer span,
+footer div,
+footer Text,
+footer Heading {
+  color: white !important;
+}
+
+/* Estilos para elementos con clases específicas del footer */
+footer [class*="chakra-text"],
+footer [class*="chakra-heading"] {
+  color: white !important;
+}
+
+/* Estilos para preservar colores originales del logo */
+img[src*="comunidad-graduada-logo"],
+img[alt*="Comunidad Graduada UNICEN"] {
+  filter: none !important;
+  -webkit-filter: none !important;
+  color: initial !important;
+  background: transparent !important;
+}
+
+/* Estilos para el navbar - preservar colores originales */
+nav img,
+.navbar img,
+[class*="navbar"] img {
+  filter: none !important;
+  -webkit-filter: none !important;
+  color: initial !important;
+  background: transparent !important;
+}
+
+/* Animación de brillo para el logo */
+@keyframes logoShine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Estilos para el contenedor del logo con efecto de brillo */
+.logo-container {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.logo-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  animation: logoShine 3s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Efecto de brillo más intenso en hover */
+.logo-container:hover .logo-shine {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 1), transparent);
+  animation: logoShine 1.5s ease-in-out infinite;
+}
+
+/* Variación de la animación para diferentes estados */
+@keyframes logoShineFast {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.logo-container:hover .logo-shine {
+  animation: logoShineFast 1.5s ease-in-out infinite;
+}
+
+/* Estilos para el header/navbar con sombra */
+header,
+nav,
+.navbar,
+[class*="navbar"],
+[class*="header"] {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  z-index: 1000 !important;
+  position: relative !important;
+}
+
+/* Estilos para textos modernos */
+.chakra-text,
+.chakra-heading {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos específicos para textos de recuadros - FORZAR COLOR NEGRO */
+.modern-card .chakra-text,
+.modern-card .chakra-heading,
+.modern-card .chakra-button,
+.modern-card p,
+.modern-card span,
+.modern-card div {
+  color: black !important;
+}
+
+/* Estilos para textos dentro de recuadros blancos */
+.bg-white .chakra-text,
+.bg-white .chakra-heading,
+.bg-white .chakra-button,
+.bg-white p,
+.bg-white span,
+.bg-white div {
+  color: black !important;
+}
+
+/* Estilos para textos específicos que deben ser negros */
+.chakra-text[color="white"],
+.chakra-heading[color="white"],
+.chakra-button[color="white"] {
+  color: black !important;
+}
+
+/* Estilos para textos con gradientes que deben ser negros */
+.chakra-heading[bgGradient],
+.chakra-text[bgGradient] {
+  color: black !important;
+  background: none !important;
+  background-clip: unset !important;
+}
+
+/* Estilos para forzar texto negro en recuadros */
+.modern-card *,
+.bg-white * {
+  color: black !important;
+}
+
+/* Estilos específicos para elementos de texto */
+.modern-card .chakra-text,
+.modern-card .chakra-heading,
+.modern-card .chakra-button,
+.modern-card p,
+.modern-card span,
+.modern-card div,
+.modern-card h1,
+.modern-card h2,
+.modern-card h3,
+.modern-card h4,
+.modern-card h5,
+.modern-card h6 {
+  color: black !important;
+}
+
+/* Estilos para textos con cualquier color que deben ser negros */
+[class*="chakra"] {
+  color: black !important;
+}
+
+/* Estilos para textos dentro de contenedores específicos */
+.modern-card [class*="chakra"],
+.bg-white [class*="chakra"] {
+  color: black !important;
+}
+
+/* Estilos para la sección del mapa - NO aplicar estilos de recuadros */
+.bg-gray-50 .chakra-heading,
+.bg-gray-50 .chakra-text {
+  color: inherit !important;
+}
+
+/* Estilos específicos para la sección del mapa */
+.bg-gray-50 h2,
+.bg-gray-50 .chakra-heading[as="h2"] {
+  color: rgb(31, 41, 55) !important; /* gray.800 */
+}
+
+/* Estilos para textos de la sección del mapa */
+.bg-gray-50 .chakra-text[color="gray.600"] {
+  color: rgb(75, 85, 99) !important; /* gray.600 */
+}
+
+/* Estilos más agresivos para el título del mapa */
+.bg-gray-50 h2,
+.bg-gray-50 .chakra-heading,
+.bg-gray-50 .chakra-heading[as="h2"],
+.bg-gray-50 .chakra-heading[data-size="xl"] {
+  color: rgb(31, 41, 55) !important; /* gray.800 */
+}
+
+/* Estilos específicos para cualquier heading en la sección del mapa */
+.bg-gray-50 .chakra-heading,
+.bg-gray-50 h1,
+.bg-gray-50 h2,
+.bg-gray-50 h3,
+.bg-gray-50 h4,
+.bg-gray-50 h5,
+.bg-gray-50 h6 {
+  color: rgb(31, 41, 55) !important; /* gray.800 */
+}
+
+/* Estilos para forzar el color en la sección del mapa */
+.bg-gray-50 * {
+  color: inherit !important;
+}
+
+.bg-gray-50 .chakra-heading {
+  color: rgb(31, 41, 55) !important; /* gray.800 */
+}
+
+/* Estilos específicos para el título del mapa */
+.mapa-titulo {
+  color: rgb(31, 41, 55) !important; /* gray.800 */
+}
+
+.mapa-titulo.chakra-heading {
+  color: rgb(31, 41, 55) !important; /* gray.800 */
+}
+
+/* Estilos para cualquier elemento con la clase mapa-titulo */
+[class*="mapa-titulo"] {
+  color: rgb(31, 41, 55) !important; /* gray.800 */
+}
+
+/* Estilos para botones del encabezado */
+.chakra-button {
+  color: rgb(24, 23, 23) !important;
+}
+
+/* Estilos específicos para botones del hero section */
+.hero-section .chakra-button,
+.hero-section button {
+  color: rgb(24, 23, 23) !important;
+}
+
+/* Estilos para botones con texto específico */
+.chakra-button:contains("Registrate"),
+.chakra-button:contains("Ver más graduados") {
+  color: rgb(24, 23, 23) !important;
+}
+
+/* Estilos para botones del encabezado principal */
+.chakra-button[data-size="md"] {
+  color: rgb(24, 23, 23) !important;
+}
+
+/* Estilos más específicos para botones del encabezado */
+.chakra-button,
+button,
+.btn {
+  color: rgb(24, 23, 23) !important;
+}
+
+/* Estilos para botones del hero section */
+.hero-section .chakra-button,
+.hero-section button,
+.hero-section .btn {
+  color: rgb(24, 23, 23) !important;
+}
+
+/* Estilos para botones con variantes específicas */
+.chakra-button[data-variant="outline"] {
+  color: rgb(24, 23, 23) !important;
+  border-color: rgb(24, 23, 23) !important;
+}
+
+/* Estilos para botones con colorScheme específico */
+.chakra-button[data-color-scheme="blue"],
+.chakra-button[data-color-scheme="gray"] {
+  color: rgb(24, 23, 23) !important;
 }
 
 /* Enlaces y botones */

@@ -494,7 +494,8 @@ export const graduadoController = {
         ciudad: graduado.ciudad,
         pais: graduado.pais,
         institucion: graduado.institucion,
-        estado: graduado.estado
+        estado: graduado.estado,
+        foto: graduado.foto
       })
     } catch (error) {
       console.error('Error al obtener perfil:', error)
@@ -808,7 +809,21 @@ export const graduadoController = {
             [Op.not]: null
           }
         },
-        attributes: ['id', 'nombre', 'apellido', 'carrera', 'ciudad', 'pais', 'institucion', 'anio_graduacion', 'latitud', 'longitud']
+        attributes: [
+          'id', 
+          'nombre', 
+          'apellido', 
+          'carrera', 
+          'ciudad', 
+          'pais', 
+          'institucion', 
+          'anio_graduacion', 
+          'latitud', 
+          'longitud',
+          'foto',
+          'lugar_trabajo',
+          'biografia'
+        ]
       });
 
       console.log('Graduados filtrados para el mapa:', graduados);
@@ -879,6 +894,81 @@ export const graduadoController = {
     } catch (error) {
       console.error('Error al actualizar observaciones:', error);
       res.status(500).json({ message: 'Error al actualizar observaciones' });
+    }
+  },
+
+  // Obtener perfil público de un graduado
+  async getPublicProfile(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      console.log(`Obteniendo perfil público del graduado ID: ${id}`);
+      
+      const graduado = await Graduado.findOne({
+        where: {
+          id: id,
+          estado: 'aprobado'
+        },
+        attributes: [
+          'id', 
+          'nombre', 
+          'apellido', 
+          'carrera', 
+          'anio_graduacion',
+          'ciudad', 
+          'pais', 
+          'lugar_trabajo',
+          'area_desempeno',
+          'sector_trabajo',
+          'biografia',
+          'foto',
+          'linkedin',
+          'email'
+        ]
+      });
+
+      if (!graduado) {
+        return res.status(404).json({ error: 'Graduado no encontrado o no aprobado' });
+      }
+
+      console.log(`Perfil público encontrado para graduado ID: ${id}`);
+      res.json(graduado);
+    } catch (error) {
+      console.error('Error al obtener perfil público:', error);
+      res.status(500).json({ error: 'Error al obtener perfil público' });
+    }
+  },
+
+  // Obtener graduado aleatorio para destacar
+  async getRandomGraduado(req: Request, res: Response) {
+    try {
+      console.log('Obteniendo graduado aleatorio para destacar...');
+      
+      const graduado = await Graduado.findOne({
+        where: {
+          estado: 'aprobado'
+        },
+        attributes: [
+          'id', 
+          'nombre', 
+          'apellido', 
+          'carrera', 
+          'ciudad', 
+          'pais', 
+          'foto'
+        ],
+        order: Graduado.sequelize?.random()
+      });
+
+      if (!graduado) {
+        console.log('No se encontraron graduados aprobados');
+        return res.status(404).json({ error: 'No se encontraron graduados aprobados' });
+      }
+
+      console.log(`Graduado aleatorio encontrado: ${graduado.nombre} ${graduado.apellido}`);
+      res.json(graduado);
+    } catch (error) {
+      console.error('Error al obtener graduado aleatorio:', error);
+      res.status(500).json({ error: 'Error al obtener graduado aleatorio' });
     }
   }
 } 

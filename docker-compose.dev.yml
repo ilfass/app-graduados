@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile.dev
+    ports:
+      - "3002:80"
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/public:/app/public:ro
+    environment:
+      - NODE_ENV=development
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "80"]
+
+  backend-dev:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile.dev
+    ports:
+      - "3003:3000"
+    volumes:
+      - ./backend/src:/app/src:ro
+      - ./uploads:/app/uploads
+    environment:
+      - NODE_ENV=development
+    command: ["npm", "run", "dev"]

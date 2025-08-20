@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  frontend-local:
+    image: harbor.unicen.edu.ar/app-graduados/frontend:latest
+    ports:
+      - "3002:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  backend-local:
+    image: harbor.unicen.edu.ar/app-graduados/backend:latest
+    ports:
+      - "3003:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped

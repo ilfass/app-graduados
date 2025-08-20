@@ -11,6 +11,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/admin/ResetPassword'
 import NavigationButtons from './components/NavigationButtons'
 import { TestPage } from './pages/TestPage'
+import GraduadoPublico from './pages/GraduadoPublico'
 
 const AppRoutes = () => {
   return (
@@ -54,6 +55,7 @@ const AppRoutes = () => {
         <Route path="/mapa" element={<GraduadosMap />} />
         <Route path="/busqueda" element={<Busqueda />} />
         <Route path="/test" element={<TestPage />} />
+        <Route path="/graduado/:id" element={<GraduadoPublico />} />
       </Routes>
       <NavigationButtons />
     </>

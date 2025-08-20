@@ -1,0 +1,24 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache python3 make g++
+
+# Copiar package.json
+COPY backend/package*.json ./
+
+# Instalar dependencias
+RUN npm install --legacy-peer-deps
+
+# Copiar código fuente
+COPY backend/ .
+
+# Crear directorios necesarios
+RUN mkdir -p /app/uploads/fotos
+
+# Exponer puerto
+EXPOSE 3000
+
+# Comando por defecto
+CMD ["npm", "run", "dev"]

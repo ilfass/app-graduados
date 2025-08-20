@@ -42,6 +42,9 @@ interface Graduado {
   anio_graduacion: number
   institucion?: string
   estado: string
+  foto?: string
+  lugar_trabajo?: string
+  biografia?: string
 }
 
 // Función para agrupar graduados por ubicación
@@ -292,29 +295,141 @@ export const GraduadosMap = () => {
               icon={item.isCluster ? clusterIcon : icon}
             >
               <Popup>
-                <div className="p-2">
+                <div className="p-2" style={{ minWidth: '300px', maxWidth: '400px' }}>
                   {item.isCluster && (
-                    <div className="location-shared">
+                    <div className="location-shared mb-2">
                       <strong>Ubicación compartida</strong>
                     </div>
                   )}
                   {item.graduados.map((graduado) => (
                     <div key={graduado.id} className="mb-3 p-2 border-b border-gray-200 last:border-b-0">
-                      <h3 className="font-semibold text-lg mb-1">
-                        {graduado.nombre} {graduado.apellido}
-                      </h3>
-                      <p className="text-gray-600">{graduado.carrera}</p>
-                      <p className="text-gray-500 text-sm">
-                        {graduado.ciudad}, {graduado.pais}
-                      </p>
-                      {graduado.institucion && (
-                        <p className="text-gray-500 text-sm">
-                          {graduado.institucion}
-                        </p>
-                      )}
-                      <p className="text-gray-500 text-sm">
-                        Año de graduación: {graduado.anio_graduacion}
-                      </p>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        {/* Columna izquierda */}
+                        <div style={{ flex: '0 0 120px' }}>
+                          {/* Foto circular */}
+                          <div style={{ 
+                            width: '80px', 
+                            height: '80px', 
+                            borderRadius: '50%', 
+                            overflow: 'hidden', 
+                            marginBottom: '8px',
+                            border: '2px solid #e2e8f0'
+                          }}>
+                            {graduado.foto ? (
+                              <img 
+                                src={graduado.foto} 
+                                alt={`${graduado.nombre} ${graduado.apellido}`}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <div style={{ 
+                                width: '100%', 
+                                height: '100%', 
+                                backgroundColor: '#e2e8f0', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                color: '#718096',
+                                fontSize: '24px'
+                              }}>
+                                {graduado.nombre.charAt(0)}{graduado.apellido.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Nombre en azul */}
+                          <h3 style={{ 
+                            fontSize: '16px', 
+                            fontWeight: 'bold', 
+                            color: '#3182ce', 
+                            marginBottom: '4px',
+                            lineHeight: '1.2'
+                          }}>
+                            {graduado.nombre} {graduado.apellido}
+                          </h3>
+                          
+                          {/* Carrera con fuente más pequeña */}
+                          <p style={{ 
+                            fontSize: '12px', 
+                            color: '#4a5568', 
+                            marginBottom: '6px',
+                            lineHeight: '1.3'
+                          }}>
+                            {graduado.carrera}
+                          </p>
+                          
+                          {/* Lugar de residencia */}
+                          <p style={{ 
+                            fontSize: '11px', 
+                            color: '#718096', 
+                            marginBottom: '4px',
+                            lineHeight: '1.2'
+                          }}>
+                            📍 {graduado.ciudad}, {graduado.pais}
+                          </p>
+                          
+                          {/* Lugar de trabajo */}
+                          {graduado.lugar_trabajo && (
+                            <p style={{ 
+                              fontSize: '11px', 
+                              color: '#718096',
+                              lineHeight: '1.2'
+                            }}>
+                              💼 {graduado.lugar_trabajo}
+                            </p>
+                          )}
+                        </div>
+                        
+                        {/* Columna derecha */}
+                        <div style={{ flex: '1' }}>
+                          {/* Biografía */}
+                          {graduado.biografia ? (
+                            <div style={{ marginBottom: '12px' }}>
+                              <p style={{ 
+                                fontSize: '12px', 
+                                color: '#2d3748', 
+                                lineHeight: '1.4',
+                                marginBottom: '8px'
+                              }}>
+                                {graduado.biografia.length > 150 
+                                  ? `${graduado.biografia.substring(0, 150)}...` 
+                                  : graduado.biografia
+                                }
+                              </p>
+                            </div>
+                          ) : (
+                            <p style={{ 
+                              fontSize: '12px', 
+                              color: '#a0aec0', 
+                              fontStyle: 'italic',
+                              marginBottom: '12px'
+                            }}>
+                              Sin biografía disponible
+                            </p>
+                          )}
+                          
+                          {/* Botón VER PERFIL */}
+                          <button 
+                            onClick={() => window.open(`/graduado/${graduado.id}`, '_blank')}
+                            style={{
+                              backgroundColor: '#3182ce',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '6px 12px',
+                              fontSize: '11px',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              width: '100%',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2c5aa0'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3182ce'}
+                          >
+                            VER PERFIL
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

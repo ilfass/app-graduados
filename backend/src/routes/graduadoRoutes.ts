@@ -8,6 +8,8 @@ const router = Router()
 router.post('/register', graduadoController.register)
 router.post('/login', graduadoController.login)
 router.get('/mapa', graduadoController.getForMap)
+router.get('/random', graduadoController.getRandomGraduado)
+router.get('/:id/public', graduadoController.getPublicProfile)
 
 // Rutas protegidas
 router.use(auth)
