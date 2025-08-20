@@ -15,9 +15,16 @@ spec:
     spec:
       imagePullSecrets:
       - name: harbor.unicen.edu.ar
+      initContainers:
+      - name: fix-permissions
+        image: busybox
+        command: ["sh", "-c", "chmod -R 777 /app/uploads"]
+        volumeMounts:
+        - name: uploads-storage
+          mountPath: /app/uploads
       containers:
       - name: backend
-        image: harbor.unicen.edu.ar/web/graduados-backend:5.2.0
+        image: harbor.unicen.edu.ar/web/graduados-backend:5.4.2
         env:
         - name: DB_PATH
           valueFrom:
@@ -42,7 +49,12 @@ spec:
         volumeMounts:
         - name: database-storage
           mountPath: /app/data
+        - name: uploads-storage
+          mountPath: /app/uploads
       volumes:
       - name: database-storage
         persistentVolumeClaim:
-          claimName: graduados-db-pvc 
+          claimName: graduados-db-pvc
+      - name: uploads-storage
+        persistentVolumeClaim:
+          claimName: graduados-uploads-pvc 
